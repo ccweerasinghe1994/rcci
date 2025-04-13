@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+# My Application data
+
+  - Framework: Next.js 15 using the App Router with React 19
+  - Language: TypeScript
+  - Styling: Tailwind CSS v4
+  - UI Components:  using shadcn/ui for your component library.
+  - Forms: React Hook Form with Zod for schema validation.
+  - Authentication: NextAuth.js v5 (beta version).
+  - Linting: Standard Next.js ESLint setup.
+
+
