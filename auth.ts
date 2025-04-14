@@ -1,7 +1,5 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { getUserByEmail, verifyPassword } from "./lib/auth/user";
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -11,27 +9,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          const user = await getUserByEmail(credentials.email as string);
+          const user = null;
 
           if (!user) {
             throw new Error("Invalid credentials.");
           }
 
-          const isValid = await verifyPassword(
-            credentials.password as string,
-            user.password
-          );
-
-          if (!isValid) {
-            throw new Error("Invalid credentials.");
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          };
+          return user;
         } catch (error) {
           console.error("Authentication error:", error);
           return null;
@@ -41,20 +25,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   pages: {
     signIn: "/login",
-  },
-  callbacks: {
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-      }
-      return token;
-    },
-    session: async ({ session, token }) => {
-      if (token) {
-        session.user.id = token.id as string;
-      }
-      return session;
-    },
   },
 });
