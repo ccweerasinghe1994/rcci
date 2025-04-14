@@ -1,9 +1,19 @@
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+// Create a separate auth configuration that doesn't use Prisma
+// for middleware (Edge runtime compatible)
+export const { auth } = NextAuth({
+  providers: [], // Empty providers array for middleware
+  pages: {
+    signIn: "/login",
+  },
+});
+
+// Full auth configuration with Prisma adapter for API routes
+export const { handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
     Credentials({
