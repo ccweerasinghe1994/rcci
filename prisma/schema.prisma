@@ -6,7 +6,6 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
   output          = "../lib/generated/prisma"
 }
 
@@ -16,11 +15,12 @@ datasource db {
 }
 
 model User {
-  id            String          @id @default(cuid())
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String?
   email         String          @unique
   emailVerified DateTime?
   image         String?
+  password      String?
   accounts      Account[]
   sessions      Session[]
   // Optional for WebAuthn support
@@ -31,7 +31,7 @@ model User {
 }
 
 model Account {
-  userId            String
+  userId            String  @db.Uuid
   type              String
   provider          String
   providerAccountId String
@@ -53,7 +53,7 @@ model Account {
 
 model Session {
   sessionToken String   @unique
-  userId       String
+  userId       String   @db.Uuid
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -72,7 +72,7 @@ model VerificationToken {
 // Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
-  userId               String
+  userId               String  @db.Uuid
   providerAccountId    String
   credentialPublicKey  String
   counter              Int
