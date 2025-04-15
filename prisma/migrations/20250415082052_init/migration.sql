@@ -1,10 +1,11 @@
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT,
     "email" TEXT NOT NULL,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
+    "password" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -13,7 +14,7 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Account" (
-    "userId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
     "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
     "providerAccountId" TEXT NOT NULL,
@@ -33,7 +34,7 @@ CREATE TABLE "Account" (
 -- CreateTable
 CREATE TABLE "Session" (
     "sessionToken" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL
@@ -51,7 +52,7 @@ CREATE TABLE "VerificationToken" (
 -- CreateTable
 CREATE TABLE "Authenticator" (
     "credentialID" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
     "providerAccountId" TEXT NOT NULL,
     "credentialPublicKey" TEXT NOT NULL,
     "counter" INTEGER NOT NULL,
