@@ -4,10 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: "standalone",
   experimental: {
-    middleware: {
-      // Use Node.js runtime for middleware
-      runtime: "nodejs",
-    },
+    nodeMiddleware: true,
   },
 };
 

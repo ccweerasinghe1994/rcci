@@ -97,3 +97,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
       Display Prisma debug info
       $ prisma debug
+
+
+# Runnig the compose file
+```bash
+docker-compose --env-file .env.local up -d postgres pgadmin
+```
