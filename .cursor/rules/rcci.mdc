@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 
 # My Application data
@@ -13,5 +13,12 @@ alwaysApply: false
   - Forms: React Hook Form with Zod for schema validation.
   - Authentication: NextAuth.js v5 (beta version).
   - Linting: Standard Next.js ESLint setup.
+  - use server action allways
+  - do not use api routes in nextjs allways server actions
+  - prisma client [prisma.ts](mdc:prisma.ts) 
+  - do not generate shadcn components all ways add then pnpm dlx shadcn@latest add [compoennt-name]
+  - prisma schema [schema.prisma](mdc:prisma/schema.prisma) 
+  - 
+
 
 
