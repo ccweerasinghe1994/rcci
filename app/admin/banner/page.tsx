@@ -2,15 +2,17 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, ImageIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { ArrowLeft, ImageIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useFormStatus } from "react-dom"
+import { getBannerData, saveBannerData } from "./action"
 
 // Define the banner data type
 interface BannerData {
@@ -31,24 +33,29 @@ const defaultBannerData: BannerData = {
   imageUrl: "/placeholder.svg?height=600&width=800",
 }
 
+function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? "Saving..." : "Save Changes"}
+    </Button>
+  )
+}
+
 export default function BannerPage() {
   const router = useRouter()
   const [bannerData, setBannerData] = useState<BannerData>(defaultBannerData)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("edit")
+  const [formSubmitStatus, setFormSubmitStatus] = useState<{ success?: boolean; message?: string } | null>(null)
 
   // Fetch banner data on component mount
   useEffect(() => {
     const fetchBannerData = async () => {
       setIsLoading(true)
       try {
-        const response = await fetch("/api/banner")
-        if (!response.ok) {
-          throw new Error("Failed to fetch banner data")
-        }
-        const data = await response.json()
+        const data = await getBannerData()
         setBannerData(data)
       } catch (error) {
         console.error("Error fetching banner data:", error)
@@ -78,43 +85,25 @@ export default function BannerPage() {
     }
   }
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
-
-    try {
-      // In a real app, you would upload the image first if changed
-      // and get back a URL to use in the banner data
-
-      // For now, we'll just simulate the image upload
-      const updatedBannerData = {
-        ...bannerData,
-        // If there's a new image, we'd use its URL here
-        // For now, we'll just keep the existing URL
-        imageUrl: previewImage ? bannerData.imageUrl : bannerData.imageUrl,
+  // Handle form submission with server action
+  const handleSubmit = async (formData: FormData) => {
+    const result = await saveBannerData(formData)
+    setFormSubmitStatus(result)
+    
+    if (result.success) {
+      // Refresh data after successful save
+      try {
+        const updatedData = await getBannerData()
+        setBannerData(updatedData)
+      } catch (error) {
+        console.error("Error fetching updated banner data:", error)
       }
-
-      // Send the updated data to the API
-      const response = await fetch("/api/banner", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedBannerData),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to update banner")
-      }
-
-      alert("Banner updated successfully!")
-    } catch (error) {
-      console.error("Error updating banner:", error)
-      alert("Failed to update banner. Please try again.")
-    } finally {
-      setIsSaving(false)
     }
+
+    // Clear status message after 3 seconds
+    setTimeout(() => {
+      setFormSubmitStatus(null)
+    }, 3000)
   }
 
   if (isLoading) {
@@ -134,6 +123,12 @@ export default function BannerPage() {
         <h2 className="text-3xl font-bold tracking-tight">Manage Hero Banner</h2>
       </div>
 
+      {formSubmitStatus && (
+        <div className={`p-4 rounded-md ${formSubmitStatus.success ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+          {formSubmitStatus.message}
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="edit">Edit</TabsTrigger>
@@ -141,7 +136,7 @@ export default function BannerPage() {
         </TabsList>
 
         <TabsContent value="edit" className="space-y-6">
-          <form onSubmit={handleSubmit}>
+          <form action={handleSubmit}>
             <Card>
               <CardHeader>
                 <CardTitle>Banner Content</CardTitle>
@@ -151,8 +146,8 @@ export default function BannerPage() {
                   <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
-                    value={bannerData.title}
-                    onChange={(e) => setBannerData({ ...bannerData, title: e.target.value })}
+                    name="title"
+                    defaultValue={bannerData.title}
                     required
                   />
                 </div>
@@ -161,9 +156,9 @@ export default function BannerPage() {
                   <Label htmlFor="content">Content</Label>
                   <Textarea
                     id="content"
+                    name="content"
                     rows={6}
-                    value={bannerData.content}
-                    onChange={(e) => setBannerData({ ...bannerData, content: e.target.value })}
+                    defaultValue={bannerData.content}
                     required
                   />
                 </div>
@@ -173,8 +168,8 @@ export default function BannerPage() {
                     <Label htmlFor="buttonText">Button Text</Label>
                     <Input
                       id="buttonText"
-                      value={bannerData.buttonText}
-                      onChange={(e) => setBannerData({ ...bannerData, buttonText: e.target.value })}
+                      name="buttonText"
+                      defaultValue={bannerData.buttonText}
                       required
                     />
                   </div>
@@ -183,8 +178,8 @@ export default function BannerPage() {
                     <Label htmlFor="buttonLink">Button Link</Label>
                     <Input
                       id="buttonLink"
-                      value={bannerData.buttonLink}
-                      onChange={(e) => setBannerData({ ...bannerData, buttonLink: e.target.value })}
+                      name="buttonLink"
+                      defaultValue={bannerData.buttonLink}
                       required
                     />
                   </div>
@@ -195,7 +190,8 @@ export default function BannerPage() {
                   <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-md p-6 relative">
                     <input
                       type="file"
-                      id="banner-image"
+                      id="image"
+                      name="image"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       accept="image/*"
                       onChange={handleImageChange}
@@ -236,9 +232,7 @@ export default function BannerPage() {
                 <Button variant="outline" type="button" onClick={() => router.push("/admin")}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSaving}>
-                  {isSaving ? "Saving..." : "Save Changes"}
-                </Button>
+                <SubmitButton />
               </CardFooter>
             </Card>
           </form>
