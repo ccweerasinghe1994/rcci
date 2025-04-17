@@ -1,5 +1,6 @@
 "use client"
 
+import { getBannerData } from "@/app/admin/banner/action"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -29,11 +30,7 @@ export default function HeroBanner() {
   useEffect(() => {
     const fetchBannerData = async () => {
       try {
-        const response = await fetch("/api/banner")
-        if (!response.ok) {
-          throw new Error("Failed to fetch banner data")
-        }
-        const data = await response.json()
+        const data = await getBannerData()
         setBannerData(data)
       } catch (error) {
         console.error("Error fetching banner data:", error)
@@ -48,52 +45,50 @@ export default function HeroBanner() {
 
   if (isLoading) {
     return (
-      <div className="relative bg-[#001a3a] text-white h-[400px] animate-pulse">
-        <div className="container h-full flex items-center">
-          <div className="w-full md:w-1/2 space-y-6">
-            <div className="h-10 bg-white/20 rounded w-3/4"></div>
-            <div className="space-y-2">
-              <div className="h-4 bg-white/20 rounded w-full"></div>
-              <div className="h-4 bg-white/20 rounded w-full"></div>
-              <div className="h-4 bg-white/20 rounded w-5/6"></div>
-            </div>
-            <div className="h-10 bg-white/20 rounded w-1/3 mt-4"></div>
+      <section className="relative bg-[#001a3a] text-white min-h-[400px] flex items-center">
+        <div className="container">
+          <div className="animate-pulse">
+            <div className="h-10 bg-white/20 rounded w-1/3 mb-6"></div>
+            <div className="h-4 bg-white/20 rounded w-full mb-2"></div>
+            <div className="h-4 bg-white/20 rounded w-5/6 mb-2"></div>
+            <div className="h-4 bg-white/20 rounded w-4/6 mb-6"></div>
+            <div className="h-10 bg-white/20 rounded w-40"></div>
           </div>
         </div>
-      </div>
+      </section>
     )
   }
 
   return (
-    <div className="relative bg-[#001a3a] text-white overflow-hidden">
-      <div className="container flex py-16">
-        <div className="w-full md:w-1/2 space-y-6 z-10">
-          <h1 className="text-4xl font-bold">{bannerData.title}</h1>
+    <section className="relative bg-[#001a3a] text-white">
+      <div className="container flex">
+      <div className="w-full md:w-1/2 py-16 md:py-20 space-y-6 z-10">
+      <h1 className="text-4xl font-bold">{bannerData.title}</h1>
           <p className="text-base">{bannerData.content}</p>
           <div className="pt-4">
-            <Link href={bannerData.buttonLink}>
-              <div className="inline-block border border-white px-8 py-3 uppercase font-medium tracking-wide hover:bg-white hover:text-[#001a3a] transition-colors">
-                {bannerData.buttonText}
-              </div>
+          <Link
+              href={bannerData.buttonLink}
+              className="inline-block border border-white px-8 py-3 uppercase font-medium tracking-wide hover:bg-white hover:text-[#001a3a] transition-colors"
+            >
+              {bannerData.buttonText}
             </Link>
           </div>
         </div>
-        <div className="hidden md:block absolute top-0 right-0 w-1/2 h-full">
-          <div className="relative w-full h-full">
+        <div className="hidden md:block absolute top-0 right-0 w-full h-full">
+
             {bannerData.imageUrl && (
               <Image
                 src={bannerData.imageUrl}
                 alt="Banner background"
                 fill
-                sizes="50vw"
-                style={{ objectFit: "cover" }}
+                className="object-cover"
                 priority
               />
             )}
-            <div className="absolute inset-0 bg-[#001a3a]/50"></div>
-          </div>
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--color-primary)_40%,rgba(22,62,172,0.62)_60%,rgba(248,247,247,0.22))]" />
+ 
         </div>
       </div>
-    </div>
+    </section>
   )
 } 

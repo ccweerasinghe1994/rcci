@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client-js"
-  output          = "../lib/generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {
@@ -83,4 +83,37 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
+}
+
+// Banner model for storing banner content
+model Banner {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title      String
+  content    String @db.Text
+  buttonText String
+  buttonLink String
+
+  // Relation to Image
+  image   Image?  @relation(fields: [imageId], references: [id])
+  imageId String? @db.Uuid
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Image model for storing image metadata
+model Image {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fileName String
+  fileSize Int
+  mimeType String
+  path     String  @unique
+  alt      String?
+
+  // Relation to Banner
+  banners Banner[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

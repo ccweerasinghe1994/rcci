@@ -1,6 +1,7 @@
 "use server";
 
-import fs from "fs";
+import { prisma } from "@/prisma";
+import { mkdir, writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import path from "path";
 
@@ -13,23 +14,19 @@ interface BannerData {
   imageUrl: string;
 }
 
-// File path for storing banner data
-const dataFilePath = path.join(process.cwd(), "data", "banner.json");
-
 /**
  * Get current banner data
  */
 export async function getBannerData(): Promise<BannerData> {
   try {
-    // Ensure the data directory exists
-    const dataDir = path.join(process.cwd(), "data");
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
+    // Find the active banner
+    const banner = await prisma.banner.findFirst({
+      where: { active: true },
+      include: { image: true },
+    });
 
-    // Check if the banner file exists
-    if (!fs.existsSync(dataFilePath)) {
-      // Return default data if file doesn't exist
+    if (!banner) {
+      // Return default data if no banner exists
       const defaultBannerData: BannerData = {
         title: "Rodrigues re-imagined",
         content:
@@ -39,19 +36,49 @@ export async function getBannerData(): Promise<BannerData> {
         imageUrl: "/placeholder.svg?height=600&width=800",
       };
 
-      fs.writeFileSync(
-        dataFilePath,
-        JSON.stringify(defaultBannerData, null, 2)
-      );
       return defaultBannerData;
     }
 
-    // Read and parse the banner data
-    const fileContent = fs.readFileSync(dataFilePath, "utf-8");
-    return JSON.parse(fileContent) as BannerData;
+    // Map the database data to the expected format
+    return {
+      title: banner.title,
+      content: banner.content,
+      buttonText: banner.buttonText,
+      buttonLink: banner.buttonLink,
+      imageUrl: banner.image
+        ? banner.image.path
+        : "/placeholder.svg?height=600&width=800",
+    };
   } catch (error) {
     console.error("Error reading banner data:", error);
     throw new Error("Failed to get banner data");
+  }
+}
+
+/**
+ * Save banner image to local storage
+ */
+async function saveImage(imageFile: File): Promise<string | null> {
+  try {
+    // Create upload directory if it doesn't exist
+    const uploadsDir = path.join(process.cwd(), "public", "uploads", "banners");
+    await mkdir(uploadsDir, { recursive: true });
+
+    // Generate unique filename
+    const uniqueFilename = `${Date.now()}-${imageFile.name
+      .replace(/\s+/g, "-")
+      .toLowerCase()}`;
+    const imagePath = path.join(uploadsDir, uniqueFilename);
+
+    // Convert file to buffer and save
+    const buffer = Buffer.from(await imageFile.arrayBuffer());
+    await writeFile(imagePath, buffer);
+
+    // Return the public URL path
+    return `/uploads/banners/${uniqueFilename}`;
+  } catch (error) {
+    console.error("Error saving image:", error);
+    return null;
   }
 }
 
@@ -70,40 +97,59 @@ export async function saveBannerData(
 
     // Get the image file if provided
     const imageFile = formData.get("image") as File | null;
-
-    // Get current banner data for existing image URL
-    const currentData = await getBannerData();
-
-    let imageUrl = currentData.imageUrl;
+    let imageId: string | null = null;
 
     // Handle image upload if a new image is provided
     if (imageFile && imageFile.size > 0) {
-      // In a real implementation, you would upload the image to a storage service
-      // and get back a URL. For now, we'll assume the upload succeeded and use a placeholder.
+      const imagePath = await saveImage(imageFile);
 
-      // Example placeholder for image upload logic:
-      // const imageUrl = await uploadImageToStorage(imageFile)
+      if (imagePath) {
+        // Create image record in database
+        const image = await prisma.image.create({
+          data: {
+            fileName: imageFile.name,
+            fileSize: imageFile.size,
+            mimeType: imageFile.type,
+            path: imagePath,
+            alt: title, // Use banner title as alt text
+          },
+        });
 
-      // For demo purposes, we'll just keep the existing URL or use a placeholder
-      imageUrl = `/images/banner/${Date.now()}-${imageFile.name}`;
+        imageId = image.id;
+      }
     }
 
-    // Prepare banner data
-    const updatedBannerData: BannerData = {
-      title,
-      content,
-      buttonText,
-      buttonLink,
-      imageUrl,
-    };
+    // Look for an existing active banner
+    const existingBanner = await prisma.banner.findFirst({
+      where: { active: true },
+    });
 
-    // Save to file
-    const dataDir = path.join(process.cwd(), "data");
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
+    if (existingBanner) {
+      // Update existing banner
+      await prisma.banner.update({
+        where: { id: existingBanner.id },
+        data: {
+          title,
+          content,
+          buttonText,
+          buttonLink,
+          ...(imageId ? { imageId } : {}),
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Create new banner
+      await prisma.banner.create({
+        data: {
+          title,
+          content,
+          buttonText,
+          buttonLink,
+          ...(imageId ? { imageId } : {}),
+          active: true,
+        },
+      });
     }
-
-    fs.writeFileSync(dataFilePath, JSON.stringify(updatedBannerData, null, 2));
 
     // Revalidate paths that might display the banner
     revalidatePath("/");
