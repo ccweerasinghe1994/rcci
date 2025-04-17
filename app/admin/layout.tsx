@@ -1,7 +1,7 @@
-import type React from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, FileText, Users, LogOut, UserCircle, ImageIcon } from "lucide-react"
+import { FileText, ImageIcon, LayoutDashboard, LogOut, UserCircle, Users } from "lucide-react"
+import Link from "next/link"
+import type React from "react"
 
 export const metadata = {
   title: "RCCI Admin",
@@ -10,8 +10,8 @@ export const metadata = {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
+
+ 
         <div className="min-h-screen flex">
           {/* Sidebar */}
           <div className="w-14 md:w-64 bg-primary text-white flex flex-col transition-all duration-300">
@@ -77,7 +77,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Button
                   variant="outline"
                   size="icon"
-                  className="w-10 h-10 md:w-full md:h-auto md:justify-start text-white border-white hover:bg-primary-foreground/10 hover:text-white"
+                  className="text-primary px-2 py-2 w-10 h-10 md:w-full md:h-auto md:justify-start border-white hover:bg-primary-foreground/10 hover:text-white"
                 >
                   <LogOut size={20} className="md:mr-2" />
                   <span className="hidden md:inline">Exit Admin</span>
@@ -94,7 +94,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <main className="flex-1 p-4 md:p-6 bg-gray-50 overflow-auto">{children}</main>
           </div>
         </div>
-      </body>
-    </html>
+
   )
 }

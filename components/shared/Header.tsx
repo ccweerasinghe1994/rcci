@@ -13,9 +13,12 @@ export default function Header() {
             <Link href={"/"} className="bg-primary w-10 h-10 flex items-center justify-center text-white font-bold text-xl">RC</Link>
             <span className="text-xl font-semibold">Rodrigues re-imagined</span>
           </div>
+          <div className="flex items-center gap-4">
+          <Link href="/admin" className="text-primary">Admin</Link>
           <Link href="/join">
             <Button>Join RCCI</Button>
           </Link>
+          </div>
         </div>
         {/* Navigation Tabs */}
         <div className="border-t border-gray-200">

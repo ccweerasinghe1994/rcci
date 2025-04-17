@@ -2,26 +2,26 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, ImageIcon, Plus } from "lucide-react"
-import { RichTextEditor } from "@/components/rich-text-editor"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+// import { RichTextEditor } from "@/components/rich-text-editor"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Sample data for authors - in a real app, this would come from an API
 const initialAuthors = [
@@ -186,7 +186,7 @@ export default function CreateArticlePage() {
                     <TabsTrigger value="preview">Preview</TabsTrigger>
                   </TabsList>
                   <TabsContent value="editor">
-                    <RichTextEditor content={content} onChange={setContent} />
+                    {/* <RichTextEditor content={content} onChange={setContent} /> */}
                   </TabsContent>
                   <TabsContent value="preview">
                     <div className="prose max-w-none border rounded-md p-4 min-h-[300px]">
