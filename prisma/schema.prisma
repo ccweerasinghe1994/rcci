@@ -117,3 +117,14 @@ model Image {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+// Author model for storing author information
+model Author {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  position    String
+  biography   String @db.Text
+  authorImage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
