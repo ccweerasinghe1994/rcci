@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCard } from "@/components/ui/dashboard-card"
-import { FileText, ImageIcon, Plus, UserCircle, Users } from "lucide-react"
+import { StatCardsGrid } from "@/components/ui/stat-cards-grid"
+import { ImageIcon, Plus, UserCircle, Users } from "lucide-react"
 import { getDashboardData } from "./actions"
 
 export default async function AdminDashboard() {
@@ -13,67 +13,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Articles</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.articles.count}</div>
-            <p className="text-xs text-muted-foreground">
-              {dashboardData.articles.lastUpdated 
-                ? `Last updated: ${new Date(dashboardData.articles.lastUpdated).toLocaleDateString()}` 
-                : "No articles yet"}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.users.count}</div>
-            <p className="text-xs text-muted-foreground">
-              {dashboardData.users.lastUpdated 
-                ? `Last updated: ${new Date(dashboardData.users.lastUpdated).toLocaleDateString()}` 
-                : "No users yet"}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Authors</CardTitle>
-            <UserCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.authors.count}</div>
-            <p className="text-xs text-muted-foreground">
-              {dashboardData.authors.lastUpdated 
-                ? `Last updated: ${new Date(dashboardData.authors.lastUpdated).toLocaleDateString()}` 
-                : "No authors yet"}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Banners</CardTitle>
-            <ImageIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.banners.count}</div>
-            <p className="text-xs text-muted-foreground">
-              {dashboardData.banners.lastUpdated 
-                ? `Last updated: ${new Date(dashboardData.banners.lastUpdated).toLocaleDateString()}` 
-                : "No banners yet"}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <StatCardsGrid data={dashboardData} />
 
       {/* Action Cards */}
       <div className="grid gap-6 md:grid-cols-2">
