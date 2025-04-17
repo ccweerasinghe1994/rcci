@@ -1,84 +1,121 @@
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, Users, Plus, ImageIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { DashboardCard } from "@/components/ui/dashboard-card"
+import { FileText, ImageIcon, Plus, UserCircle, Users } from "lucide-react"
+import { getDashboardData } from "./actions"
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const dashboardData = await getDashboardData()
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Summary Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
+            <CardTitle className="text-sm font-medium">Articles</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
+            <div className="text-2xl font-bold">{dashboardData.articles.count}</div>
+            <p className="text-xs text-muted-foreground">
+              {dashboardData.articles.lastUpdated 
+                ? `Last updated: ${new Date(dashboardData.articles.lastUpdated).toLocaleDateString()}` 
+                : "No articles yet"}
+            </p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Registered Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45</div>
-            <p className="text-xs text-muted-foreground">+5 from last month</p>
+            <div className="text-2xl font-bold">{dashboardData.users.count}</div>
+            <p className="text-xs text-muted-foreground">
+              {dashboardData.users.lastUpdated 
+                ? `Last updated: ${new Date(dashboardData.users.lastUpdated).toLocaleDateString()}` 
+                : "No users yet"}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Authors</CardTitle>
+            <UserCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardData.authors.count}</div>
+            <p className="text-xs text-muted-foreground">
+              {dashboardData.authors.lastUpdated 
+                ? `Last updated: ${new Date(dashboardData.authors.lastUpdated).toLocaleDateString()}` 
+                : "No authors yet"}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Banners</CardTitle>
+            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardData.banners.count}</div>
+            <p className="text-xs text-muted-foreground">
+              {dashboardData.banners.lastUpdated 
+                ? `Last updated: ${new Date(dashboardData.banners.lastUpdated).toLocaleDateString()}` 
+                : "No banners yet"}
+            </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Action Cards */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Hero Banner</CardTitle>
-            <CardDescription>Manage the homepage hero banner content and image</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-between items-center">
-            <div>Last updated: April 15, 2025</div>
-            <Link href="/admin/banner">
-              <Button>
-                <ImageIcon className="mr-2 h-4 w-4" />
-                Edit Banner
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Articles Management</CardTitle>
-            <CardDescription>Create and manage articles for the RCCI website</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-between items-center">
-            <div>12 total articles</div>
-            <Link href="/admin/articles/create">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Article
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>User Management</CardTitle>
-            <CardDescription>Manage registered users of the RCCI platform</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-between items-center">
-            <div>45 registered users</div>
-            <Link href="/admin/users">
-              <Button variant="outline">
-                <Users className="mr-2 h-4 w-4" />
-                View Users
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <DashboardCard
+          title="Hero Banner"
+          description="Manage the homepage hero banner content and image"
+          lastUpdated={dashboardData.banners.lastUpdated}
+          linkHref="/admin/banner"
+          linkText="Edit Banner"
+          icon={<ImageIcon className="mr-2 h-4 w-4" />}
+          count={dashboardData.banners.count}
+        />
+        
+        <DashboardCard
+          title="Articles Management"
+          description="Create and manage articles for the RCCI website"
+          lastUpdated={dashboardData.articles.lastUpdated}
+          linkHref="/admin/articles/create"
+          linkText="Create Article"
+          icon={<Plus className="mr-2 h-4 w-4" />}
+          count={dashboardData.articles.count}
+        />
+        
+        <DashboardCard
+          title="Authors Management"
+          description="Manage authors who contribute to the RCCI website"
+          lastUpdated={dashboardData.authors.lastUpdated}
+          linkHref="/admin/authors"
+          linkText="Manage Authors"
+          icon={<UserCircle className="mr-2 h-4 w-4" />}
+          count={dashboardData.authors.count}
+        />
+        
+        <DashboardCard
+          title="User Management"
+          description="Manage registered users of the RCCI platform"
+          lastUpdated={dashboardData.users.lastUpdated}
+          linkHref="/admin/users"
+          linkText="View Users"
+          icon={<Users className="mr-2 h-4 w-4" />}
+          count={dashboardData.users.count}
+        />
       </div>
     </div>
   )
