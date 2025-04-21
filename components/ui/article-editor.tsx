@@ -37,32 +37,25 @@ const ImageUploader = {
           if (!input.files || !input.files[0]) return;
           
           const file = input.files[0];
-          const formData = new FormData();
-          formData.append('image', file);
           
           try {
-            // Upload the image
-            const response = await fetch('/api/upload', {
-              method: 'POST',
-              body: formData,
-            });
-            
-            if (!response.ok) throw new Error('Upload failed');
-            
-            const data = await response.json();
-            const imageUrl = data.url;
-            
-            // Insert image into editor
-            const range = quill.getSelection() as QuillRange | null;
-            if (range) {
-              quill.insertEmbed(range.index, 'image', imageUrl);
-            } else {
-              // Insert at the end if no selection
-              quill.insertEmbed(quill.getLength(), 'image', imageUrl);
-            }
+            // Create a temporary local preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              if (event.target?.result && quill) {
+                const range = quill.getSelection() as QuillRange | null;
+                if (range) {
+                  quill.insertEmbed(range.index, 'image', event.target.result);
+                } else {
+                  // Insert at the end if no selection
+                  quill.insertEmbed(quill.getLength(), 'image', event.target.result);
+                }
+              }
+            };
+            reader.readAsDataURL(file);
           } catch (error) {
-            console.error('Error uploading image:', error);
-            alert('Failed to upload image. Please try again.');
+            console.error('Error handling image:', error);
+            alert('Failed to handle image. Please try again.');
           }
         };
       });
