@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Data Models
+
+The application uses Prisma with PostgreSQL. Key models include:
+
+- User - Authentication and user data
+- Article - Content management for articles
+- Author - Article authors information
+- Banner - Site banner content
+- Image - Image metadata and storage info
+
+## Schema Overview
+
+- Article model: [schema.prisma](mdc:prisma/schema.prisma)
+  - Contains title, slug, content, excerpt fields
+  - Related to Author and Image models
+  
+- Prisma Client: [prisma.ts](mdc:prisma.ts)
+  - Used throughout the application for database access

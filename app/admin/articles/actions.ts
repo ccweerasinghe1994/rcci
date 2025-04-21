@@ -105,7 +105,7 @@ export async function createArticle(formData: FormData) {
         category,
         status,
         publishedAt: status === "published" ? new Date() : null,
-        authorId: authorId || null,
+        authorId: authorId === "none" ? null : authorId || null,
         imageId: imageId || null,
       },
       include: {
@@ -164,7 +164,7 @@ export async function updateArticle(formData: FormData) {
         category,
         status,
         publishedAt: status === "published" ? new Date() : null,
-        authorId: authorId || null,
+        authorId: authorId === "none" ? null : authorId || null,
         imageId: imageId || null,
       },
       include: {

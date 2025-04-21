@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Structure
+
+- `app/` - Next.js App Router directory
+  - `(logged-out)/` - Route group for non-authenticated users
+  - `(main)/` - Main application routes
+  - `admin/` - Admin panel routes
+  - `api/` - API routes (server actions preferred over these)
+- `components/` - Reusable React components
+  - `sections/` - Larger page sections (like [daily-comment-section.tsx](mdc:components/sections/daily-comment-section.tsx))
+  - `shared/` - Components shared across multiple features
+  - `tables/` - Table components
+  - `ui/` - Basic UI components (mostly shadcn-based)
+- `lib/` - Utility functions and library code
+  - `generated/` - Generated code (e.g., Prisma client)
+- `prisma/` - Database schema and migrations
+- `public/` - Static assets
+  - `images/` - Image assets
+
+  - `uploads/` - User-uploaded content

@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Component Guidelines
+
+1. Use the article-content class for rendering HTML content safely
+2. Always use Next.js Link for navigation, not the Lucide React Link icon
+3. Maintain consistent styling with Tailwind utility classes
+4. Use dangerouslySetInnerHTML only with proper content sanitization
+
+## Examples
+
+- Article content rendering: [daily-comment-section.tsx](mdc:components/sections/daily-comment-section.tsx)
+  - Uses dangerouslySetInnerHTML with the article-content class
+  - Properly uses Next.js Link component for navigation
+
+## CSS Guidelines
+
+- Global styles in [globals.css](mdc:app/globals.css)
+- Component-specific styles should use Tailwind utility classes
+- The article-content class provides styling for HTML content
