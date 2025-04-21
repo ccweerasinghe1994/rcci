@@ -2,17 +2,9 @@
 import "quill/dist/quill.snow.css";
 import type React from "react";
 
+import { ArticleEditor } from "@/components/ui/article-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ImageIcon, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-// import { RichTextEditor } from "@/components/rich-text-editor"
-import Editor from "@/components/shared/editor";
 import {
   Dialog,
   DialogClose,
@@ -22,75 +14,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Quill from "quill";
-
-// Define Quill module interfaces for TypeScript
-interface QuillRange {
-  index: number;
-  length: number;
-}
-
-interface QuillToolbar {
-  addHandler: (format: string, handler: () => void) => void;
-}
-
-// Add Image Uploader module for Quill
-const ImageUploader = {
-  id: 'imageUploader',
-  init: function(quill: Quill) {
-    try {
-      // Create toolbar button
-      const toolbar = quill.getModule('toolbar') as QuillToolbar;
-      
-      toolbar.addHandler('image', function() {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        // When a file is selected
-        input.onchange = async () => {
-          if (!input.files || !input.files[0]) return;
-          
-          const file = input.files[0];
-          const formData = new FormData();
-          formData.append('image', file);
-          
-          try {
-            // Upload the image
-            const response = await fetch('/api/upload', {
-              method: 'POST',
-              body: formData,
-            });
-            
-            if (!response.ok) throw new Error('Upload failed');
-            
-            const data = await response.json();
-            const imageUrl = data.url;
-            
-            // Insert image into editor
-            const range = quill.getSelection() as QuillRange | null;
-            if (range) {
-              quill.insertEmbed(range.index, 'image', imageUrl);
-            } else {
-              // Insert at the end if no selection
-              quill.insertEmbed(quill.getLength(), 'image', imageUrl);
-            }
-          } catch (error) {
-            console.error('Error uploading image:', error);
-            alert('Failed to upload image. Please try again.');
-          }
-        };
-      });
-    } catch (error) {
-      console.error('Error initializing image uploader:', error);
-    }
-  }
-};
-
-// Register the image upload module
-Quill.register('modules/imageUploader', ImageUploader);
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, ImageIcon, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 // Sample data for authors - in a real app, this would come from an API
 const initialAuthors = [
@@ -114,78 +44,24 @@ const initialAuthors = [
   },
 ]
 
-const Delta = Quill.import('delta');
-
 export default function CreateArticlePage() {
-  const router = useRouter()
-  const [title, setTitle] = useState("")
-  const [slug, setSlug] = useState("")
-  const [excerpt, setExcerpt] = useState("")
-  const [content, setContent] = useState("")
-  const [authorId, setAuthorId] = useState("")
-  const [category, setCategory] = useState("")
-  const [status, setStatus] = useState("draft")
-  const [featuredImage, setFeaturedImage] = useState<File | null>(null)
-  const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null)
-  const [authors, setAuthors] = useState(initialAuthors)
-  const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false)
+  const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [content, setContent] = useState("");
+  const [authorId, setAuthorId] = useState("");
+  const [category, setCategory] = useState("");
+  const [status, setStatus] = useState("draft");
+  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
+  const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null);
+  const [authors, setAuthors] = useState(initialAuthors);
+  const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
   const [newAuthor, setNewAuthor] = useState({
     name: "",
     position: "",
     biography: "",
-  })
-  const [range, setRange] = useState<any>();
-  const [lastChange, setLastChange] = useState<any>();
-  const [readOnly, setReadOnly] = useState(false);
-
-  // Use a ref to access the quill instance directly
-  const quillRef = useRef<Quill>(null);
-  const editorInitialized = useRef(false);
-
-  // Set up the editor with image upload capability
-  useEffect(() => {
-    if (quillRef.current && !editorInitialized.current) {
-      try {
-        // Set up custom toolbar options if needed
-        const toolbar = quillRef.current.getModule('toolbar') as QuillToolbar;
-        
-        toolbar.addHandler('image', function() {
-          const input = document.createElement('input');
-          input.setAttribute('type', 'file');
-          input.setAttribute('accept', 'image/*');
-          input.click();
-          
-          input.onchange = async () => {
-            if (!input.files || !input.files[0]) return;
-            
-            const file = input.files[0];
-            
-            // Create preview URL
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              if (event.target?.result && quillRef.current) {
-                // Insert the image at current cursor position
-                const range = quillRef.current.getSelection() as QuillRange | null;
-                if (range) {
-                  const imageUrl = event.target.result as string;
-                  quillRef.current.insertEmbed(range.index, 'image', imageUrl);
-                } else if (quillRef.current) {
-                  // Insert at the end if no selection
-                  const imageUrl = event.target.result as string;
-                  quillRef.current.insertEmbed(quillRef.current.getLength(), 'image', imageUrl);
-                }
-              }
-            };
-            reader.readAsDataURL(file);
-          };
-        });
-        
-        editorInitialized.current = true;
-      } catch (error) {
-        console.error('Error setting up image handler:', error);
-      }
-    }
-  }, [quillRef.current]);
+  });
 
   // Generate slug from title
   const generateSlug = (title: string) => {
@@ -194,57 +70,49 @@ export default function CreateArticlePage() {
       .replace(/[^\w\s-]/g, "")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
-      .trim()
-  }
+      .trim();
+  };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value
-    setTitle(newTitle)
-    setSlug(generateSlug(newTitle))
-  }
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    setSlug(generateSlug(newTitle));
+  };
 
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSlug(e.target.value.replace(/\s+/g, "-").toLowerCase())
-  }
+    setSlug(e.target.value.replace(/\s+/g, "-").toLowerCase());
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setFeaturedImage(file)
+      const file = e.target.files[0];
+      setFeaturedImage(file);
 
       // Create preview URL
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          setFeaturedImagePreview(event.target.result as string)
+          setFeaturedImagePreview(event.target.result as string);
         }
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleAddAuthor = () => {
-    const id = Math.random().toString(36).substring(2, 9)
-    const author = { id, ...newAuthor }
-    setAuthors([...authors, author])
-    setAuthorId(author.id)
-    setNewAuthor({ name: "", position: "", biography: "" })
-    setIsAddAuthorOpen(false)
-  }
-
-  // When content changes in the editor, update the content state
-  const handleContentChange = (delta: any, oldDelta: any, source: string) => {
-    setLastChange(delta);
-    if (quillRef.current) {
-      setContent(quillRef.current.root.innerHTML);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
+  const handleAddAuthor = () => {
+    const id = Math.random().toString(36).substring(2, 9);
+    const author = { id, ...newAuthor };
+    setAuthors([...authors, author]);
+    setAuthorId(author.id);
+    setNewAuthor({ name: "", position: "", biography: "" });
+    setIsAddAuthorOpen(false);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Get the author object based on authorId
-    const selectedAuthor = authors.find((author) => author.id === authorId)
+    const selectedAuthor = authors.find((author) => author.id === authorId);
 
     // Here you would typically send the data to your backend
     console.log({
@@ -256,11 +124,11 @@ export default function CreateArticlePage() {
       category,
       status,
       featuredImage,
-    })
+    });
 
-    alert("Article saved successfully!")
-    router.push("/admin/articles")
-  }
+    alert("Article saved successfully!");
+    router.push("/admin/articles");
+  };
 
   return (
     <div className="space-y-6">
@@ -311,97 +179,10 @@ export default function CreateArticlePage() {
                 <CardTitle>Article Body</CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="editor">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="editor">Rich Editor</TabsTrigger>
-                    <TabsTrigger value="preview">Preview</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="editor">
-                  <div>
-                    <Editor
-                      ref={quillRef}
-                      readOnly={readOnly}
-                      defaultValue={new Delta()
-                        .insert('Hello')
-                        .insert('\n', { header: 1 })
-                        .insert('Some ')
-                        .insert('initial', { bold: true })
-                        .insert(' ')
-                        .insert('content', { underline: true })
-                        .insert('\n')}
-                      onSelectionChange={setRange}
-                      onTextChange={handleContentChange}
-                    />
-                    <div className="flex border border-t-0 border-gray-300 p-2.5">
-                      <label className="flex items-center">
-                        Read Only:{' '}
-                        <input
-                          type="checkbox"
-                          checked={readOnly}
-                          onChange={(e) => setReadOnly(e.target.checked)}
-                          className="ml-2"
-                        />
-                      </label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="ml-4"
-                        onClick={() => {
-                          // Manually trigger image upload
-                          const input = document.createElement('input');
-                          input.setAttribute('type', 'file');
-                          input.setAttribute('accept', 'image/*');
-                          input.click();
-                          
-                          input.onchange = async (e: any) => {
-                            if (!e.target?.files?.[0] || !quillRef.current) return;
-                            
-                            const file = e.target.files[0];
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              if (event.target?.result && quillRef.current) {
-                                const range = quillRef.current.getSelection() || { index: quillRef.current.getLength(), length: 0 };
-                                quillRef.current.insertEmbed(range.index, 'image', event.target.result);
-                              }
-                            };
-                            reader.readAsDataURL(file);
-                          };
-                        }}
-                      >
-                        <ImageIcon className="h-4 w-4 mr-2" />
-                        Add Image
-                      </Button>
-                      <button
-                        className="ml-auto"
-                        type="button"
-                        onClick={() => {
-                          alert(quillRef.current?.getLength());
-                        }}
-                      >
-                        Get Content Length
-                      </button>
-                    </div>
-                    <div className="my-2.5 font-mono">
-                      <div className="text-gray-500 uppercase">Current Range:</div>
-                      {range ? JSON.stringify(range) : 'Empty'}
-                    </div>
-                    <div className="my-2.5 font-mono">
-                      <div className="text-gray-500 uppercase">Last Change:</div>
-                      {lastChange ? JSON.stringify(lastChange.ops) : 'Empty'}
-                    </div>
-                  </div>
-                  </TabsContent>
-                  <TabsContent value="preview">
-                    <div className="prose max-w-none border rounded-md p-4 min-h-[300px]">
-                      {content ? (
-                        <div dangerouslySetInnerHTML={{ __html: content }} />
-                      ) : (
-                        <p className="text-muted-foreground">No content to preview</p>
-                      )}
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                <ArticleEditor 
+                  content={content}
+                  onChange={setContent}
+                />
               </CardContent>
             </Card>
           </div>
@@ -538,8 +319,8 @@ export default function CreateArticlePage() {
                         className="mt-2 w-full"
                         type="button"
                         onClick={() => {
-                          setFeaturedImage(null)
-                          setFeaturedImagePreview(null)
+                          setFeaturedImage(null);
+                          setFeaturedImagePreview(null);
                         }}
                       >
                         Remove Image
@@ -561,5 +342,5 @@ export default function CreateArticlePage() {
         </div>
       </form>
     </div>
-  )
+  );
 }
