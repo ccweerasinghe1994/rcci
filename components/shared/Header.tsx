@@ -15,6 +15,8 @@ export default function Header() {
           </div>
           <div className="flex items-center gap-4">
           <Link href="/admin" className="text-primary">Admin</Link>
+          <Link href="/login" className="text-primary">Login</Link>
+          <Link href="/help" className="text-primary">Help</Link>
           <Link href="/join">
             <Button>Join RCCI</Button>
           </Link>
