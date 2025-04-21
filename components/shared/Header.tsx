@@ -73,7 +73,7 @@ export default function Header() {
                   <SheetClose asChild>
                     <Link 
                       href="/admin" 
-                      className={`text-lg py-2 border-b border-gray-100 ${isActive('/admin') ? 'text-primary font-medium' : 'text-gray-600'}`}
+                      className={`text-lg py-2 border-b border-gray-100 hover:border-b-primary ${isActive('/admin') ? 'text-primary font-medium border-b-primary' : 'text-gray-600 hover:text-primary transition-colors'}`}
                     >
                       Admin
                     </Link>
@@ -81,7 +81,7 @@ export default function Header() {
                   <SheetClose asChild>
                     <Link 
                       href="/login" 
-                      className={`text-lg py-2 border-b border-gray-100 ${isActive('/login') ? 'text-primary font-medium' : 'text-gray-600'}`}
+                      className={`text-lg py-2 border-b border-gray-100 hover:border-b-primary ${isActive('/login') ? 'text-primary font-medium border-b-primary' : 'text-gray-600 hover:text-primary transition-colors'}`}
                     >
                       Login
                     </Link>
@@ -89,7 +89,7 @@ export default function Header() {
                   <SheetClose asChild>
                     <Link 
                       href="/help" 
-                      className={`text-lg py-2 border-b border-gray-100 ${isActive('/help') ? 'text-primary font-medium' : 'text-gray-600'}`}
+                      className={`text-lg py-2 border-b border-gray-100 hover:border-b-primary ${isActive('/help') ? 'text-primary font-medium border-b-primary' : 'text-gray-600 hover:text-primary transition-colors'}`}
                     >
                       Help
                     </Link>
@@ -104,7 +104,7 @@ export default function Header() {
                     <SheetClose asChild>
                       <Link 
                         href="/get-started" 
-                        className={`block text-lg py-2 border-b border-gray-100 ${isActive('/get-started') ? 'text-primary font-medium' : 'text-gray-600'}`}
+                        className={`block text-lg py-2 border-b border-gray-100 hover:border-b-primary ${isActive('/get-started') ? 'text-primary font-medium border-b-primary' : 'text-gray-600 hover:text-primary transition-colors'}`}
                       >
                         GET STARTED
                       </Link>
@@ -112,7 +112,7 @@ export default function Header() {
                     <SheetClose asChild>
                       <Link 
                         href="/news-media" 
-                        className={`block text-lg py-2 border-b border-gray-100 ${isActive('/news-media') ? 'text-primary font-medium' : 'text-gray-600'}`}
+                        className={`block text-lg py-2 border-b border-gray-100 hover:border-b-primary ${isActive('/news-media') ? 'text-primary font-medium border-b-primary' : 'text-gray-600 hover:text-primary transition-colors'}`}
                       >
                         NEWS & MEDIA
                       </Link>
