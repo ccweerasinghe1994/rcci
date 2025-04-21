@@ -1,12 +1,10 @@
 "use client";
 
 import Editor from "@/components/shared/editor";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ImageIcon } from "lucide-react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 // Define Quill module interfaces for TypeScript
 interface QuillRange {
@@ -17,56 +15,6 @@ interface QuillRange {
 interface QuillToolbar {
   addHandler: (format: string, handler: () => void) => void;
 }
-
-// Add Image Uploader module for Quill
-const ImageUploader = {
-  id: 'imageUploader',
-  init: function(quill: Quill) {
-    try {
-      // Create toolbar button
-      const toolbar = quill.getModule('toolbar') as QuillToolbar;
-      
-      toolbar.addHandler('image', function() {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        // When a file is selected
-        input.onchange = async () => {
-          if (!input.files || !input.files[0]) return;
-          
-          const file = input.files[0];
-          
-          try {
-            // Create a temporary local preview
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              if (event.target?.result && quill) {
-                const range = quill.getSelection() as QuillRange | null;
-                if (range) {
-                  quill.insertEmbed(range.index, 'image', event.target.result);
-                } else {
-                  // Insert at the end if no selection
-                  quill.insertEmbed(quill.getLength(), 'image', event.target.result);
-                }
-              }
-            };
-            reader.readAsDataURL(file);
-          } catch (error) {
-            console.error('Error handling image:', error);
-            alert('Failed to handle image. Please try again.');
-          }
-        };
-      });
-    } catch (error) {
-      console.error('Error initializing image uploader:', error);
-    }
-  }
-};
-
-// Register the image upload module
-Quill.register('modules/imageUploader', ImageUploader);
 
 interface ArticleEditorProps {
   content: string;
@@ -81,51 +29,6 @@ export function ArticleEditor({ content, onChange, initialContent }: ArticleEdit
   const [range, setRange] = useState<any>();
   const [lastChange, setLastChange] = useState<any>();
   const Delta = Quill.import('delta');
-
-  // Set up the editor with image upload capability
-  useEffect(() => {
-    if (quillRef.current && !editorInitialized.current) {
-      try {
-        // Set up custom toolbar options if needed
-        const toolbar = quillRef.current.getModule('toolbar') as QuillToolbar;
-        
-        toolbar.addHandler('image', function() {
-          const input = document.createElement('input');
-          input.setAttribute('type', 'file');
-          input.setAttribute('accept', 'image/*');
-          input.click();
-          
-          input.onchange = async () => {
-            if (!input.files || !input.files[0]) return;
-            
-            const file = input.files[0];
-            
-            // Create preview URL
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              if (event.target?.result && quillRef.current) {
-                // Insert the image at current cursor position
-                const range = quillRef.current.getSelection() as QuillRange | null;
-                if (range) {
-                  const imageUrl = event.target.result as string;
-                  quillRef.current.insertEmbed(range.index, 'image', imageUrl);
-                } else if (quillRef.current) {
-                  // Insert at the end if no selection
-                  const imageUrl = event.target.result as string;
-                  quillRef.current.insertEmbed(quillRef.current.getLength(), 'image', imageUrl);
-                }
-              }
-            };
-            reader.readAsDataURL(file);
-          };
-        });
-        
-        editorInitialized.current = true;
-      } catch (error) {
-        console.error('Error setting up image handler:', error);
-      }
-    }
-  }, [quillRef.current]);
 
   // When content changes in the editor, update the content state
   const handleContentChange = (delta: any, oldDelta: any, source: string) => {
@@ -164,36 +67,6 @@ export function ArticleEditor({ content, onChange, initialContent }: ArticleEdit
                 className="ml-2"
               />
             </label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="ml-4"
-              onClick={() => {
-                // Manually trigger image upload
-                const input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
-                input.click();
-                
-                input.onchange = async (e: any) => {
-                  if (!e.target?.files?.[0] || !quillRef.current) return;
-                  
-                  const file = e.target.files[0];
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    if (event.target?.result && quillRef.current) {
-                      const range = quillRef.current.getSelection() || { index: quillRef.current.getLength(), length: 0 };
-                      quillRef.current.insertEmbed(range.index, 'image', event.target.result);
-                    }
-                  };
-                  reader.readAsDataURL(file);
-                };
-              }}
-            >
-              <ImageIcon className="h-4 w-4 mr-2" />
-              Add Image
-            </Button>
           </div>
         </div>
       </TabsContent>

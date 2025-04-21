@@ -2,7 +2,6 @@
 import "quill/dist/quill.snow.css";
 import type React from "react";
 
-import { ArticleEditor } from "@/components/ui/article-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,33 +18,29 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ImageIcon, Plus } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
+import { addAuthor, getAuthors } from "../../authors/actions";
+import { createArticle } from "../actions";
 
-// Sample data for authors - in a real app, this would come from an API
-const initialAuthors = [
+// Dynamically import the article editor component to avoid SSR issues
+const DynamicArticleEditor = dynamic(
+  () => import("@/components/ui/article-editor").then((mod) => mod.ArticleEditor),
   {
-    id: "1",
-    name: "John Doe",
-    position: "Editor-in-Chief",
-    biography: "John has been writing about business and economics for over 15 years.",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    position: "Senior Writer",
-    biography: "Jane specializes in technology and innovation topics.",
-  },
-  {
-    id: "3",
-    name: "Robert Johnson",
-    position: "Contributing Editor",
-    biography: "Robert brings insights from his 20 years of experience in the industry.",
-  },
-]
+    ssr: false,
+    loading: () => (
+      <div className="border rounded-md min-h-[300px] flex items-center justify-center bg-gray-50">
+        <p className="text-gray-400">Loading editor...</p>
+      </div>
+    ),
+  }
+);
 
 export default function CreateArticlePage() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -55,13 +50,35 @@ export default function CreateArticlePage() {
   const [status, setStatus] = useState("draft");
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null);
-  const [authors, setAuthors] = useState(initialAuthors);
+  const [authors, setAuthors] = useState<any[]>([]);
   const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
   const [newAuthor, setNewAuthor] = useState({
     name: "",
     position: "",
     biography: "",
   });
+  const [isLoadingAuthors, setIsLoadingAuthors] = useState(true);
+
+  // Load authors on component mount
+  useEffect(() => {
+    const loadAuthors = async () => {
+      try {
+        const result = await getAuthors();
+        if (result.authors) {
+          setAuthors(result.authors);
+        } else {
+          toast.error("Failed to load authors");
+        }
+      } catch (error) {
+        console.error("Error loading authors:", error);
+        toast.error("Error loading authors");
+      } finally {
+        setIsLoadingAuthors(false);
+      }
+    };
+
+    loadAuthors();
+  }, []);
 
   // Generate slug from title
   const generateSlug = (title: string) => {
@@ -99,35 +116,73 @@ export default function CreateArticlePage() {
     }
   };
 
-  const handleAddAuthor = () => {
-    const id = Math.random().toString(36).substring(2, 9);
-    const author = { id, ...newAuthor };
-    setAuthors([...authors, author]);
-    setAuthorId(author.id);
-    setNewAuthor({ name: "", position: "", biography: "" });
-    setIsAddAuthorOpen(false);
+  const handleAddAuthor = async () => {
+    if (!newAuthor.name || !newAuthor.position || !newAuthor.biography) {
+      toast.error("Please fill in all author fields");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("name", newAuthor.name);
+        formData.append("position", newAuthor.position);
+        formData.append("biography", newAuthor.biography);
+
+        const result = await addAuthor(formData);
+
+        if (result.success && result.author) {
+          setAuthors([...authors, result.author]);
+          setAuthorId(result.author.id);
+          setNewAuthor({ name: "", position: "", biography: "" });
+          setIsAddAuthorOpen(false);
+          toast.success("Author added successfully");
+        } else {
+          toast.error(result.error || "Failed to add author");
+        }
+      } catch (error) {
+        console.error("Error adding author:", error);
+        toast.error("Error adding author");
+      }
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Get the author object based on authorId
-    const selectedAuthor = authors.find((author) => author.id === authorId);
+    if (!title || !slug || !content || !category) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
-    // Here you would typically send the data to your backend
-    console.log({
-      title,
-      slug,
-      excerpt,
-      content,
-      author: selectedAuthor,
-      category,
-      status,
-      featuredImage,
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("slug", slug);
+        formData.append("excerpt", excerpt);
+        formData.append("content", content);
+        formData.append("authorId", authorId);
+        formData.append("category", category);
+        formData.append("status", status);
+        
+        if (featuredImage) {
+          formData.append("featuredImage", featuredImage);
+        }
+
+        const result = await createArticle(formData);
+
+        if (result.success) {
+          toast.success("Article created successfully");
+          router.push("/admin/articles");
+        } else {
+          toast.error(result.error || "Failed to create article");
+        }
+      } catch (error) {
+        console.error("Error creating article:", error);
+        toast.error("Error creating article");
+      }
     });
-
-    alert("Article saved successfully!");
-    router.push("/admin/articles");
   };
 
   return (
@@ -179,7 +234,7 @@ export default function CreateArticlePage() {
                 <CardTitle>Article Body</CardTitle>
               </CardHeader>
               <CardContent>
-                <ArticleEditor 
+                <DynamicArticleEditor 
                   content={content}
                   onChange={setContent}
                 />
@@ -250,7 +305,9 @@ export default function CreateArticlePage() {
                           <DialogClose asChild>
                             <Button variant="outline">Cancel</Button>
                           </DialogClose>
-                          <Button onClick={handleAddAuthor}>Add Author</Button>
+                          <Button onClick={handleAddAuthor} disabled={isPending}>
+                            {isPending ? "Adding..." : "Add Author"}
+                          </Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
@@ -260,11 +317,21 @@ export default function CreateArticlePage() {
                       <SelectValue placeholder="Select author" />
                     </SelectTrigger>
                     <SelectContent>
-                      {authors.map((author) => (
-                        <SelectItem key={author.id} value={author.id}>
-                          {author.name} - {author.position}
+                      {isLoadingAuthors ? (
+                        <SelectItem value="loading" disabled>
+                          Loading authors...
                         </SelectItem>
-                      ))}
+                      ) : authors.length > 0 ? (
+                        authors.map((author) => (
+                          <SelectItem key={author.id} value={author.id}>
+                            {author.name} - {author.position}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>
+                          No authors available
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -287,7 +354,9 @@ export default function CreateArticlePage() {
                 <Button variant="outline" onClick={() => router.push("/admin/articles")}>
                   Cancel
                 </Button>
-                <Button type="submit">{status === "published" ? "Publish" : "Save Draft"}</Button>
+                <Button type="submit" disabled={isPending}>
+                  {isPending ? "Saving..." : status === "published" ? "Publish" : "Save Draft"}
+                </Button>
               </CardFooter>
             </Card>
 

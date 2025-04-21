@@ -114,16 +114,46 @@ model Image {
   // Relation to Banner
   banners Banner[]
 
+  // Relation to Article
+  articles Article[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 // Author model for storing author information
 model Author {
-  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
   position    String
-  biography   String @db.Text
+  biography   String  @db.Text
   authorImage String?
+
+  // Relation to Article
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Article model for storing article content
+model Article {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  slug        String    @unique
+  excerpt     String?   @db.Text
+  content     String    @db.Text
+  category    String
+  status      String    @default("draft") // draft or published
+  publishedAt DateTime?
+
+  // Relation to Author
+  author   Author? @relation(fields: [authorId], references: [id])
+  authorId String? @db.Uuid
+
+  // Relation to Image (featured image)
+  featuredImage Image?  @relation(fields: [imageId], references: [id])
+  imageId       String? @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

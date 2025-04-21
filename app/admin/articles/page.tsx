@@ -1,84 +1,91 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Plus, Search, Edit, Trash2, Eye } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
-
-// Sample data for articles
-const initialArticles = [
-  {
-    id: "1",
-    title: "RCCI Members' Code of Conduct",
-    slug: "rcci-members-code-of-conduct",
-    author: "Admin",
-    date: "March 3, 2025",
-    status: "Published",
-  },
-  {
-    id: "2",
-    title: "A daily comment in france",
-    slug: "a-daily-comment-in-france",
-    author: "John Doe",
-    date: "March 24, 2025",
-    status: "Published",
-  },
-  {
-    id: "3",
-    title: "Les avantages du télétravail dans le monde moderne",
-    slug: "les-avantages-du-teletravail",
-    author: "Juswal",
-    date: "March 19, 2025",
-    status: "Published",
-  },
-  {
-    id: "4",
-    title: "Lorem Ipsum Dolor",
-    slug: "lorem-ipsum-dolor",
-    author: "John Doe",
-    date: "February 5, 2025",
-    status: "Published",
-  },
-  {
-    id: "5",
-    title: "Lorem de french",
-    slug: "lorem-de-french",
-    author: "John Doe",
-    date: "February 5, 2025",
-    status: "Published",
-  },
-  {
-    id: "6",
-    title: "Draft Article",
-    slug: "draft-article",
-    author: "Admin",
-    date: "April 15, 2025",
-    status: "Draft",
-  },
-]
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { format } from "date-fns"
+import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useState, useTransition } from "react"
+import { toast } from "sonner"
+import { deleteArticle, getArticles } from "./actions"
 
 export default function ArticlesPage() {
-  const [articles, setArticles] = useState(initialArticles)
+  const [isPending, startTransition] = useTransition()
+  const [articles, setArticles] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [articleToDelete, setArticleToDelete] = useState<(typeof initialArticles)[0] | null>(null)
+  const [articleToDelete, setArticleToDelete] = useState<any | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch articles on component mount
+  useEffect(() => {
+    const loadArticles = async () => {
+      try {
+        const result = await getArticles()
+        if (result.articles) {
+          setArticles(result.articles)
+        } else {
+          toast.error("Failed to load articles")
+        }
+      } catch (error) {
+        console.error("Error loading articles:", error)
+        toast.error("Error loading articles")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadArticles()
+  }, [])
 
   const filteredArticles = articles.filter(
     (article) =>
       article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      article.author.toLowerCase().includes(searchTerm.toLowerCase()),
+      (article.author?.name && article.author.name.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+  const handleDeleteClick = (article: any) => {
+    setArticleToDelete(article)
+    setIsDeleteDialogOpen(true)
+  }
 
   const handleDeleteArticle = () => {
     if (!articleToDelete) return
-    setArticles(articles.filter((article) => article.id !== articleToDelete.id))
-    setIsDeleteDialogOpen(false)
-    setArticleToDelete(null)
+
+    startTransition(async () => {
+      try {
+        const formData = new FormData()
+        formData.append("id", articleToDelete.id)
+
+        const result = await deleteArticle(formData)
+
+        if (result.success) {
+          setArticles(articles.filter((article) => article.id !== articleToDelete.id))
+          toast.success("Article deleted successfully")
+        } else {
+          toast.error(result.error || "Failed to delete article")
+        }
+      } catch (error) {
+        console.error("Error deleting article:", error)
+        toast.error("Error deleting article")
+      } finally {
+        setIsDeleteDialogOpen(false)
+        setArticleToDelete(null)
+      }
+    })
+  }
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "MMMM d, yyyy")
+    } catch (error) {
+      return dateString
+    }
   }
 
   return (
@@ -95,11 +102,11 @@ export default function ArticlesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Articles Management</CardTitle>
+          <CardTitle>Manage Articles</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center mb-6">
-            <div className="relative w-full max-w-sm">
+          <div className="mb-4">
+            <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -111,7 +118,11 @@ export default function ArticlesPage() {
             </div>
           </div>
 
-          <div className="rounded-md border">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <p>Loading articles...</p>
+            </div>
+          ) : filteredArticles.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -125,18 +136,32 @@ export default function ArticlesPage() {
               <TableBody>
                 {filteredArticles.map((article) => (
                   <TableRow key={article.id}>
-                    <TableCell className="font-medium">{article.title}</TableCell>
-                    <TableCell>{article.author}</TableCell>
-                    <TableCell>{article.date}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-3">
+                        {article.featuredImage && (
+                          <div className="relative w-10 h-10 rounded overflow-hidden bg-muted">
+                            <Image
+                              src={article.featuredImage.path}
+                              alt={article.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1 truncate max-w-[300px]">{article.title}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{article.author?.name || "—"}</TableCell>
+                    <TableCell>{formatDate(article.createdAt)}</TableCell>
                     <TableCell>
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          article.status === "Published"
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          article.status === "published"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {article.status}
+                        {article.status === "published" ? "Published" : "Draft"}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
@@ -146,6 +171,8 @@ export default function ArticlesPage() {
                             <span className="sr-only">Open menu</span>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
@@ -155,29 +182,30 @@ export default function ArticlesPage() {
                               className="h-4 w-4"
                             >
                               <circle cx="12" cy="12" r="1" />
-                              <circle cx="12" cy="5" r="1" />
-                              <circle cx="12" cy="19" r="1" />
+                              <circle cx="19" cy="12" r="1" />
+                              <circle cx="5" cy="12" r="1" />
                             </svg>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            <span>View</span>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/articles/${article.slug}`} className="flex items-center" target="_blank">
+                              <Eye className="mr-2 h-4 w-4" />
+                              View
+                            </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/articles/edit/${article.id}`} className="flex items-center">
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => {
-                              setArticleToDelete(article)
-                              setIsDeleteDialogOpen(true)
-                            }}
+                            className="text-red-600 focus:text-red-600"
+                            onClick={() => handleDeleteClick(article)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
+                            Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -186,7 +214,20 @@ export default function ArticlesPage() {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-muted-foreground">No articles found.</p>
+              {searchTerm && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Try a different search term or{" "}
+                  <Button variant="link" className="p-0 h-auto" onClick={() => setSearchTerm("")}>
+                    clear the search
+                  </Button>
+                  .
+                </p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -194,20 +235,17 @@ export default function ArticlesPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Article</DialogTitle>
+            <DialogTitle>Confirm Deletion</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            <p>
-              Are you sure you want to delete <span className="font-semibold">{articleToDelete?.title}</span>? This
-              action cannot be undone.
-            </p>
-          </div>
+          <p>
+            Are you sure you want to delete the article "{articleToDelete?.title}"? This action cannot be undone.
+          </p>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button variant="destructive" onClick={handleDeleteArticle}>
-              Delete
+            <Button variant="destructive" onClick={handleDeleteArticle} disabled={isPending}>
+              {isPending ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
