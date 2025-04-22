@@ -4,42 +4,106 @@ import Image from "next/image"
 import Link from "next/link"
 // Helper to split HTML content into roughly equal word columns
 function splitHtmlContentIntoColumns(html: string, numCols: number, maxWordsPerCol: number, hasImage: boolean = false) {
-  // Remove tags for word splitting, but keep original for rendering
+  // For column splitting, we need to work with plain text to count words
   const tempDiv = typeof window === "undefined" ? null : document.createElement("div")
   let textContent = ""
+  
   if (tempDiv) {
     tempDiv.innerHTML = html
     textContent = tempDiv.textContent || ""
   } else {
-    // fallback for SSR: strip tags
+    // fallback for SSR: strip tags for word counting only
     textContent = html.replace(/<[^>]+>/g, "")
   }
+  
   const words = textContent.split(/\s+/)
-  const columns: string[] = []
-  let wordIndex = 0
-
+  const totalWords = words.length
+  
+  // Calculate column breaks based on word positions
+  const columnBreaks = []
+  
   // Adjust word count for first column if there's an image
   const firstColWordCount = hasImage ? Math.floor(maxWordsPerCol / 2) : maxWordsPerCol
-  const remainingCols = numCols - 1
   
-  // First column
-  let start = wordIndex
-  let end = Math.min(start + firstColWordCount, words.length)
-  columns.push(words.slice(start, end).join(" "))
-  wordIndex = end
-
-  // Distribute remaining words across other columns
-  const remainingWords = words.length - wordIndex
-  const wordsPerRemainingCol = Math.ceil(remainingWords / remainingCols)
-
-  for (let i = 1; i < numCols; i++) {
-    start = wordIndex
-    end = Math.min(start + wordsPerRemainingCol, words.length)
-    columns.push(words.slice(start, end).join(" "))
-    wordIndex = end
+  // Calculate word positions for each column
+  let wordPosition = firstColWordCount
+  columnBreaks.push(wordPosition)
+  
+  const remainingCols = numCols - 1
+  if (remainingCols > 0) {
+    const wordsPerRemainingCol = Math.ceil((totalWords - wordPosition) / remainingCols)
+    
+    for (let i = 1; i < numCols - 1; i++) {
+      wordPosition += wordsPerRemainingCol
+      if (wordPosition < totalWords) {
+        columnBreaks.push(wordPosition)
+      }
+    }
+  }
+  
+  // Now split the HTML at appropriate positions
+  // This is a simplified approach - a more robust solution would use a proper HTML parser
+  const htmlWords = html.split(/(\s+)/)
+  const columns = []
+  
+  let wordCount = 0
+  let currentColumn = ""
+  let columnIndex = 0
+  
+  for (let i = 0; i < htmlWords.length; i++) {
+    const part = htmlWords[i]
+    currentColumn += part
+    
+    // Count non-empty, non-tag words
+    if (part.trim().length > 0 && !part.match(/<[^>]+>/)) {
+      wordCount++
+    }
+    
+    if (columnIndex < columnBreaks.length && wordCount >= columnBreaks[columnIndex]) {
+      // Try to find the end of the current paragraph or sentence to make a cleaner break
+      let lookAhead = i + 1
+      let foundBreak = false
+      
+      while (lookAhead < htmlWords.length && lookAhead < i + 20) {
+        const nextPart = htmlWords[lookAhead]
+        if (nextPart.includes('</p>') || nextPart.includes('.') || nextPart.includes('!') || nextPart.includes('?')) {
+          // Include up to this part in the current column
+          while (i < lookAhead) {
+            i++
+            currentColumn += htmlWords[i]
+          }
+          foundBreak = true
+          break
+        }
+        lookAhead++
+      }
+      
+      columns.push(currentColumn)
+      currentColumn = ""
+      columnIndex++
+    }
+  }
+  
+  // Add the remaining content to the last column
+  if (currentColumn) {
+    columns.push(currentColumn)
+  }
+  
+  // Fill any remaining columns with empty strings
+  while (columns.length < numCols) {
+    columns.push("")
   }
   
   return columns
+}
+
+// Function to prepare HTML content for rendering
+function prepareHtmlContent(html: string): string {
+  console.log(html)
+  // Only clean up empty paragraphs while preserving all other HTML
+  return html
+    .replace(/<p>\s*<br>\s*<\/p>/g, '')
+    .replace(/<p><br><\/p>/g, '')
 }
 
 async function getLatestArticle() {
@@ -68,7 +132,7 @@ export async function DailyCommentSection() {
   if (!latestArticle) return null
 
   // Function to extract a short excerpt
-  const createExcerpt = (content: string, maxLength = 51200): string => {
+  const createExcerpt = (content: string, maxLength = 3000): string => {
     if (content.length <= maxLength) return content
     return content.substring(0, maxLength).trim() + "..."
   }
@@ -110,7 +174,7 @@ export async function DailyCommentSection() {
                   />
                 </div>
               }
-                {columns[0]}
+                <div dangerouslySetInnerHTML={{ __html: prepareHtmlContent(columns[0]) }} />
               </div>
             </div>
           </div>
@@ -119,7 +183,7 @@ export async function DailyCommentSection() {
           <div>
             <div className="prose max-w-none h-full flex flex-col justify-between">
               <div className="article-content">
-                {columns[1]}
+                <div dangerouslySetInnerHTML={{ __html: prepareHtmlContent(columns[1]) }} />
               
               {/* Show "Read More" link in second column if third column is empty */}
               {!hasThirdColumn && (
@@ -139,7 +203,7 @@ export async function DailyCommentSection() {
             <div className="flex flex-col h-full justify-between">
               <div className="prose max-w-none">
                 <div className="article-content">
-                  {columns[2]}
+                  <div dangerouslySetInnerHTML={{ __html: prepareHtmlContent(columns[2]) }} />
                 </div>
               </div>
               <Link

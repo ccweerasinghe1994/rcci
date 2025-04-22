@@ -178,3 +178,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.article-content p {
+  margin-bottom: 1rem;
+}
+
+.article-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Make sure there's proper spacing between paragraphs */
+.article-content p + p {
+  margin-top: 1rem;
+}
