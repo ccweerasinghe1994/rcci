@@ -181,7 +181,7 @@
 
 
 .article-content p {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .article-content p:last-child {
@@ -190,5 +190,5 @@
 
 /* Make sure there's proper spacing between paragraphs */
 .article-content p + p {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }

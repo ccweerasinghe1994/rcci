@@ -132,7 +132,7 @@ export async function DailyCommentSection() {
   if (!latestArticle) return null
 
   // Function to extract a short excerpt
-  const createExcerpt = (content: string, maxLength = 3000): string => {
+  const createExcerpt = (content: string, maxLength = 2000): string => {
     if (content.length <= maxLength) return content
     return content.substring(0, maxLength).trim() + "..."
   }
@@ -144,11 +144,10 @@ export async function DailyCommentSection() {
 
   const hasImage = !!latestArticle.featuredImage
   // Split the excerpt into 3 columns, with adjusted word count if image is present
-  const maxWordsPerCol = 90
+  const maxWordsPerCol = 100
   const columns = splitHtmlContentIntoColumns(excerpt, 3, maxWordsPerCol, hasImage)
   
   // Determine the number of columns with content
-  const activeColumns = columns.filter(col => col.trim().length > 0).length
   const hasThirdColumn = columns[2] && columns[2].trim().length > 0
 
   return (
@@ -204,14 +203,15 @@ export async function DailyCommentSection() {
               <div className="prose max-w-none">
                 <div className="article-content">
                   <div dangerouslySetInnerHTML={{ __html: prepareHtmlContent(columns[2]) }} />
-                </div>
-              </div>
-              <Link
+                  <Link
                 href={`/articles/${latestArticle.slug}`}
                 className="text-primary font-medium hover:underline mt-4"
               >
                 Read More
               </Link>
+                </div>
+              </div>
+              
             </div>
           )}
         </div>
