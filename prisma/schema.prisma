@@ -92,6 +92,7 @@ model Banner {
   content    String @db.Text
   buttonText String
   buttonLink String
+  type       String @default("hero") // Values: "hero", "get-started", "news-media"
 
   // Relation to Image
   image   Image?  @relation(fields: [imageId], references: [id])
