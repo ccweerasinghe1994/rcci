@@ -1,10 +1,9 @@
 import { getArticleBySlug, getArticles } from "@/app/admin/articles/actions"
 import { Button } from "@/components/ui/button"
-import { Facebook, Linkedin, Mail } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { CopyLinkButton } from "../components/copy-link-button"
+import { SocialShare } from "@/components/shared/SocialShare"
 
 export async function generateStaticParams() {
   const { articles } = await getArticles()
@@ -53,6 +52,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         day: 'numeric',
       })
     : ""
+    
+  // Prepare URL for sharing
+  const fullUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://rcci.org'}/articles/${slug}`
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -112,37 +114,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               {/* Main Content */}
               <div className="md:w-2/3">
                 {/* Social Sharing */}
-                <div className="flex flex-col gap-2 float-left mr-6">
-                  <Link
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://rcci.org'}/articles/${slug}`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-full bg-[#3b5998] flex items-center justify-center text-white"
-                  >
-                    <Facebook size={16} />
-                  </Link>
-                  <Link
-                    href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
-                      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://rcci.org'}/articles/${slug}`
-                    )}&title=${encodeURIComponent(article.title)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-full bg-[#0077b5] flex items-center justify-center text-white"
-                  >
-                    <Linkedin size={16} />
-                  </Link>
-                  <Link
-                    href={`mailto:?subject=${encodeURIComponent(article.title)}&body=${encodeURIComponent(
-                      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://rcci.org'}/articles/${slug}`
-                    )}`}
-                    className="w-8 h-8 rounded-full bg-[#d14836] flex items-center justify-center text-white"
-                  >
-                    <Mail size={16} />
-                  </Link>
-                  <CopyLinkButton url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://rcci.org'}/articles/${slug}`} />
-                </div>
+                <SocialShare 
+                  className="float-left mr-6" 
+                  vertical={true} 
+                  title={article.title}
+                  url={fullUrl}
+                />
 
                 {/* Article Title and Meta */}
                 <div className="ml-16">

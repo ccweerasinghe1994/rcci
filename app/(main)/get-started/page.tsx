@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Facebook, Linkedin, Mail, LinkIcon } from "lucide-react"
 import HeroBanner from "@/components/sections/HeroBanner"
+import { SocialShare } from "@/components/shared/SocialShare"
 
 export default function GetStarted() {
   return (
@@ -31,23 +31,7 @@ export default function GetStarted() {
         <section className="py-8">
           <div className="container">
             {/* Social Sharing */}
-            <div className="flex flex-col gap-2 float-left mr-6">
-              <Link href="#" className="w-8 h-8 rounded-full bg-[#3b5998] flex items-center justify-center text-white">
-                <Facebook size={16} />
-              </Link>
-              <Link href="#" className="w-8 h-8 rounded-full bg-[#0077b5] flex items-center justify-center text-white">
-                <Linkedin size={16} />
-              </Link>
-              <Link href="#" className="w-8 h-8 rounded-full bg-[#d14836] flex items-center justify-center text-white">
-                <Mail size={16} />
-              </Link>
-              <Link
-                href="#"
-                className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700"
-              >
-                <LinkIcon size={16} />
-              </Link>
-            </div>
+            <SocialShare className="float-left mr-6" vertical={true} title="Get Started with RCCI" />
 
             <div className="ml-16">
               <h2 className="text-2xl font-bold mb-8">Get Started</h2>
