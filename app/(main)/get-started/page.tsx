@@ -14,10 +14,10 @@ export default function GetStarted() {
         <section className="border-b border-gray-200 py-4">
           <div className="container">
             <div className="flex gap-8">
-              <Link href="#join-rcci" className="text-primary hover:underline">
+              <Link href="join" className="text-primary hover:underline">
                 Join the RCCI
               </Link>
-              <Link href="#start-business" className="text-primary hover:underline">
+              <Link href="/start-business" className="text-primary hover:underline">
                 Start a business
               </Link>
               <Link href="#about-rcci" className="text-primary hover:underline">
