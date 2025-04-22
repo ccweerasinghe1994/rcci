@@ -1,13 +1,13 @@
-import Link from "next/link"
-import Image from "next/image"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import Image from "next/image"
+import Link from "next/link"
 
 export function NewsSection() {
   return (
     <section className="py-16 md:py-24">
       <div className="container">
         <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Latest News & Events</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Latest RCCI News & Events</h2>
           <Link href="#" className="text-primary hover:underline mt-4 md:mt-0">
             View all news
           </Link>
