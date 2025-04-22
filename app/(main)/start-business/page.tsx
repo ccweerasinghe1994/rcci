@@ -31,68 +31,48 @@ export default function StartBusiness() {
         <section className="py-8">
           <div className="container">
             {/* Social Sharing */}
-            <SocialShare className="float-left mr-6" vertical={true} title="Start a Business in Rodrigues" />
+            <SocialShare className="float-left mr-6" vertical={true} title="Get Started with RCCI" />
 
             <div className="ml-16">
-              <h2 className="text-2xl font-bold mb-8">Start a Business in Rodrigues</h2>
+              <h2 className="text-2xl font-bold mb-8">Get Started</h2>
 
-              {/* Business Registration */}
-              <div className="mb-12 border border-gray-200 rounded-lg p-6" id="business-registration">
-                <h3 className="text-xl font-bold mb-2">Business Registration Process</h3>
+              {/* RCCI Members' Code of Conduct */}
+              <div className="mb-12 border border-gray-200 rounded-lg p-6">
+                <Link href="/articles/rcci-members-code-of-conduct" className="block hover:underline">
+                  <h3 className="text-xl font-bold mb-2">RCCI Members' Code of Conduct</h3>
+                </Link>
+                <div className="mb-1">John Doe</div>
+                <div className="text-gray-500 text-sm mb-4">March 3, 2025</div>
                 <div className="prose max-w-none">
                   <p>
-                    Starting a business in Rodrigues requires following these steps for proper registration:
-                  </p>
-                  <ol className="list-decimal pl-5 mt-4 space-y-2">
-                    <li>Choose a business structure (sole proprietorship, partnership, corporation)</li>
-                    <li>Register your business name with the Registrar of Companies</li>
-                    <li>Obtain a Business Registration Number (BRN)</li>
-                    <li>Register for tax purposes with the Mauritius Revenue Authority</li>
-                    <li>Apply for any necessary permits or licenses specific to your industry</li>
-                    <li>Register with the Social Security office if you'll have employees</li>
-                  </ol>
-                  <p className="mt-4">
-                    The RCCI can provide guidance throughout this process and connect you with the right resources.
+                    The RCCI Members' Code of Conduct establishes guidelines for professional behavior and ethical
+                    practices for all members.
                   </p>
                 </div>
               </div>
 
-              {/* Business Planning */}
-              <div className="mb-12 border border-gray-200 rounded-lg p-6" id="business-planning">
-                <h3 className="text-xl font-bold mb-2">Business Planning Resources</h3>
+              {/* Start a business */}
+              <div className="mb-12 border border-gray-200 rounded-lg p-6" id="start-business">
+                <h3 className="text-xl font-bold mb-2">Start a business</h3>
+                <div className="mb-1">John Doe</div>
+                <div className="text-gray-500 text-sm mb-4">March 3, 2025</div>
                 <div className="prose max-w-none">
                   <p>
-                    A solid business plan is essential for any new venture. The RCCI offers resources to help you develop your business plan:
-                  </p>
-                  <ul className="list-disc pl-5 mt-4 space-y-2">
-                    <li>Business plan templates and guides</li>
-                    <li>Market research assistance</li>
-                    <li>Financial planning tools</li>
-                    <li>Mentorship opportunities with established business owners</li>
-                    <li>Workshops and seminars on business planning</li>
-                  </ul>
-                  <p className="mt-4">
-                    Contact the RCCI office to schedule a consultation with our business advisors.
+                    Learn about the necessary steps, documentation, and resources needed to establish a new business in
+                    Rodrigues.
                   </p>
                 </div>
               </div>
 
-              {/* Funding Options */}
-              <div className="mb-12 border border-gray-200 rounded-lg p-6" id="funding-options">
-                <h3 className="text-xl font-bold mb-2">Funding and Financial Support</h3>
+              {/* Why You Should Join the RCCI */}
+              <div className="mb-12 border border-gray-200 rounded-lg p-6" id="join-rcci">
+                <h3 className="text-xl font-bold mb-2">Why You Should Join the RCCI</h3>
+                <div className="mb-1">John Doe</div>
+                <div className="text-gray-500 text-sm mb-4">March 3, 2025</div>
                 <div className="prose max-w-none">
                   <p>
-                    Explore various funding options available to entrepreneurs in Rodrigues:
-                  </p>
-                  <ul className="list-disc pl-5 mt-4 space-y-2">
-                    <li>Government grants and subsidies for small businesses</li>
-                    <li>Small business loans from local banks and credit unions</li>
-                    <li>Microfinance programs</li>
-                    <li>Angel investors and venture capital options</li>
-                    <li>Crowdfunding platforms</li>
-                  </ul>
-                  <p className="mt-4">
-                    The RCCI can help connect you with financial institutions and inform you about available government support programs.
+                    Discover the benefits of becoming an RCCI member, including networking opportunities, advocacy, and
+                    business resources.
                   </p>
                 </div>
               </div>
