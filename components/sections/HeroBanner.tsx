@@ -11,29 +11,56 @@ interface BannerData {
   buttonText: string
   buttonLink: string
   imageUrl: string
+  type: string
 }
 
 // Default banner data as fallback
-const defaultBannerData: BannerData = {
-  title: "Rodrigues re-imagined",
-  content:
-    "All over the world, the private sector is a major driver of industrial development, economic growth and social integration and well-being. The Rodrigues Chamber of Commerce and Industry provides a platform of self-organisation and representation to inspire and support Rodriguan businesses in their drive towards an inclusive and sustainable development.",
-  buttonText: "JOIN THE CHAMBER",
-  buttonLink: "/join",
-  imageUrl: "/placeholder.svg?height=600&width=800",
+const defaultBannerData: Record<string, BannerData> = {
+  hero: {
+    title: "Rodrigues re-imagined",
+    content:
+      "All over the world, the private sector is a major driver of industrial development, economic growth and social integration and well-being. The Rodrigues Chamber of Commerce and Industry provides a platform of self-organisation and representation to inspire and support Rodriguan businesses in their drive towards an inclusive and sustainable development.",
+    buttonText: "JOIN THE CHAMBER",
+    buttonLink: "/join",
+    imageUrl: "/placeholder.svg?height=600&width=800",
+    type: "hero"
+  },
+  "get-started": {
+    title: "Get Started with RCCI",
+    content:
+      "Begin your journey with the Rodrigues Chamber of Commerce and Industry. Learn about our services, membership benefits, and how we can help your business grow.",
+    buttonText: "LEARN MORE",
+    buttonLink: "/get-started#benefits",
+    imageUrl: "/placeholder.svg?height=600&width=800",
+    type: "get-started"
+  },
+  "news-media": {
+    title: "News & Media",
+    content:
+      "Stay updated with the latest news, events, and announcements from the Rodrigues Chamber of Commerce and Industry and our business community.",
+    buttonText: "VIEW ALL",
+    buttonLink: "/news-media",
+    imageUrl: "/placeholder.svg?height=600&width=800",
+    type: "news-media"
+  },
 }
 
-export default function HeroBanner() {
-  const [bannerData, setBannerData] = useState<BannerData>(defaultBannerData)
+interface HeroBannerProps {
+  type?: string
+}
+
+export default function HeroBanner({ type = "hero" }: HeroBannerProps) {
+  const [bannerData, setBannerData] = useState<BannerData>(defaultBannerData[type] || defaultBannerData.hero)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchBannerData = async () => {
       try {
-        const data = await getBannerData()
+        setIsLoading(true)
+        const data = await getBannerData(type)
         setBannerData(data)
       } catch (error) {
-        console.error("Error fetching banner data:", error)
+        console.error(`Error fetching banner data for type ${type}:`, error)
         // Fall back to default data on error
       } finally {
         setIsLoading(false)
@@ -41,7 +68,7 @@ export default function HeroBanner() {
     }
 
     fetchBannerData()
-  }, [])
+  }, [type])
 
   if (isLoading) {
     return (

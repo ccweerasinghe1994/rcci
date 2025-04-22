@@ -2,42 +2,14 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Facebook, Linkedin, Mail, Link2, Info } from "lucide-react"
+import HeroBanner from "@/components/sections/HeroBanner"
 
 export default function NewsMedia() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="bg-[#0d3b66] text-white">
-          <div className="container py-12 relative">
-            <div className="flex flex-col md:flex-row">
-              <div className="md:w-2/3 space-y-4">
-                <h1 className="text-3xl font-bold">News & Media</h1>
-                <p className="max-w-xl">
-                  Lorem ipsum dolor sit amet. Eos pariatur libero ea provident deserunt in possimus repudiandae ut
-                  placeat inventore 33 quia iure. Qui porro mollitia ut saepe libero vel earum nisi eum libero
-                  voluptatem aut nobis inventore 33 eligendi enim 33.
-                </p>
-                <div className="pt-4">
-                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-[#0d3b66]">
-                    Subscribe
-                  </Button>
-                </div>
-              </div>
-              <div className="hidden md:flex md:w-1/3 justify-end">
-                <div className="relative w-64 h-64">
-                  <Image
-                    src="/placeholder.svg?height=200&width=200"
-                    alt="People with ideas"
-                    width={200}
-                    height={200}
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Banner Section */}
+        <HeroBanner type="news-media" />
 
         {/* Secondary Navigation */}
         <section className="border-b border-gray-200 py-4">

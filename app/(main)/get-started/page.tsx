@@ -1,27 +1,14 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Facebook, Linkedin, Mail, LinkIcon } from "lucide-react"
+import HeroBanner from "@/components/sections/HeroBanner"
 
 export default function GetStarted() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
-        {/* Blue Hero Section */}
-        <section className="bg-[#1976D2] text-white py-12">
-          <div className="container">
-            <h1 className="text-3xl font-bold mb-4">Get Started</h1>
-            <p className="max-w-2xl mb-8">
-              New to the RCCI? Here you find valuable information to help you understand the Chamber's purpose and how
-              it can support you in your entrepreneurial journey.
-            </p>
-            <Link
-              href="/join"
-              className="inline-block border border-white px-8 py-3 uppercase font-medium tracking-wide hover:bg-white hover:text-[#1976D2] transition-colors"
-            >
-              Join the Chamber
-            </Link>
-          </div>
-        </section>
+        {/* Banner Section */}
+        <HeroBanner type="get-started" />
 
         {/* Secondary Navigation */}
         <section className="border-b border-gray-200 py-4">
