@@ -3,7 +3,7 @@ import { formatDistanceToNow } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
 // Helper to split HTML content into roughly equal word columns
-function splitHtmlContentIntoColumns(html: string, numCols: number, maxWordsPerCol: number) {
+function splitHtmlContentIntoColumns(html: string, numCols: number, maxWordsPerCol: number, hasImage: boolean = false) {
   // Remove tags for word splitting, but keep original for rendering
   const tempDiv = typeof window === "undefined" ? null : document.createElement("div")
   let textContent = ""
@@ -18,13 +18,27 @@ function splitHtmlContentIntoColumns(html: string, numCols: number, maxWordsPerC
   const columns: string[] = []
   let wordIndex = 0
 
-  for (let i = 0; i < numCols; i++) {
-    const start = wordIndex
-    const end = Math.min(start + maxWordsPerCol, words.length)
-    const colWords = words.slice(start, end)
-    columns.push(colWords.join(" "))
+  // Adjust word count for first column if there's an image
+  const firstColWordCount = hasImage ? Math.floor(maxWordsPerCol / 2) : maxWordsPerCol
+  const remainingCols = numCols - 1
+  
+  // First column
+  let start = wordIndex
+  let end = Math.min(start + firstColWordCount, words.length)
+  columns.push(words.slice(start, end).join(" "))
+  wordIndex = end
+
+  // Distribute remaining words across other columns
+  const remainingWords = words.length - wordIndex
+  const wordsPerRemainingCol = Math.ceil(remainingWords / remainingCols)
+
+  for (let i = 1; i < numCols; i++) {
+    start = wordIndex
+    end = Math.min(start + wordsPerRemainingCol, words.length)
+    columns.push(words.slice(start, end).join(" "))
     wordIndex = end
   }
+  
   return columns
 }
 
@@ -54,7 +68,7 @@ export async function DailyCommentSection() {
   if (!latestArticle) return null
 
   // Function to extract a short excerpt
-  const createExcerpt = (content: string, maxLength = 1200): string => {
+  const createExcerpt = (content: string, maxLength = 51200): string => {
     if (content.length <= maxLength) return content
     return content.substring(0, maxLength).trim() + "..."
   }
@@ -64,9 +78,10 @@ export async function DailyCommentSection() {
     ? formatDistanceToNow(new Date(latestArticle.publishedAt), { addSuffix: true })
     : ""
 
-  // Split the excerpt into 3 columns, each with a max word count
-  const maxWordsPerCol = 70
-  const columns = splitHtmlContentIntoColumns(excerpt, 3, maxWordsPerCol)
+  const hasImage = !!latestArticle.featuredImage
+  // Split the excerpt into 3 columns, with adjusted word count if image is present
+  const maxWordsPerCol = 90
+  const columns = splitHtmlContentIntoColumns(excerpt, 3, maxWordsPerCol, hasImage)
   
   // Determine the number of columns with content
   const activeColumns = columns.filter(col => col.trim().length > 0).length
