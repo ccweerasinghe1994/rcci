@@ -11,26 +11,23 @@ function limitWords(title: string, limit = 10): string {
   return words.slice(0, limit).join(' ') + '...';
 }
 
-async function getAllNewsArticles() {
+async function getDailyCommentArticles() {
   try {
-    // Get categories for all news sections
-    const categories = await prisma.category.findMany({
+    // Find the daily-comment category
+    const category = await prisma.category.findUnique({
       where: {
-        slug: { in: ["news", "daily-comment", "newsletter"] }
-      },
-      select: { id: true }
+        slug: "daily-comment"
+      }
     });
 
-    const categoryIds = categories.map(cat => cat.id);
-    
-    if (categoryIds.length === 0) {
+    if (!category) {
       return [];
     }
 
-    // Get latest articles from these categories
+    // Get articles from the daily-comment category
     const articles = await prisma.article.findMany({
       where: {
-        categoryId: { in: categoryIds },
+        categoryId: category.id,
         status: "published"
       },
       orderBy: {
@@ -40,26 +37,25 @@ async function getAllNewsArticles() {
         featuredImage: true,
         author: true,
         category: true
-      },
-      take: 9 // Show more articles on the main page
+      }
     });
 
     return articles;
   } catch (error) {
-    console.error("Error fetching news articles:", error);
+    console.error("Error fetching daily comment articles:", error);
     return [];
   }
 }
 
-export default async function NewsMediaPage() {
-  const articles = await getAllNewsArticles();
+export default async function DailyCommentPage() {
+  const articles = await getDailyCommentArticles();
 
   return (
     <div className="container py-8 md:py-12">
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold">News &amp; Media</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">Daily Comment</h1>
         <p className="text-lg text-muted-foreground mt-2">
-          The latest news, updates, and insights from RCCI
+          Daily insights and commentary from RCCI experts
         </p>
       </div>
 
@@ -69,10 +65,9 @@ export default async function NewsMediaPage() {
             <Card key={article.id} className="flex flex-col h-full">
               <CardHeader className="pb-3">
                 <div className="text-sm text-muted-foreground mb-1">
-                  {article.category?.name || "News"} • {
-                    article.publishedAt 
-                      ? formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })
-                      : "Recently"
+                  {article.publishedAt 
+                    ? formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })
+                    : "Recently"
                   }
                 </div>
                 <CardTitle className="line-clamp-2" title={article.title}>
@@ -115,10 +110,13 @@ export default async function NewsMediaPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No news articles found.</p>
+        <div className="text-center py-12 border rounded-lg bg-gray-50">
+          <p className="text-muted-foreground mb-4">No daily comments found.</p>
+          <p className="text-sm text-muted-foreground">
+            Check back tomorrow for the latest commentary from our experts.
+          </p>
         </div>
       )}
     </div>
   );
-}
+} 

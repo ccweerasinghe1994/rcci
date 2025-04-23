@@ -7,10 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Edit, Plus, Search, Trash2 } from "lucide-react";
+import { Edit, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createCategory, deleteCategory, getCategories, updateCategory } from "./actions";
+
+// Required categories for the news-media section
+const REQUIRED_CATEGORIES = [
+  {
+    name: "News",
+    slug: "news",
+    description: "RCCI in the news and press coverage"
+  },
+  {
+    name: "Daily Comment",
+    slug: "daily-comment",
+    description: "Daily commentary and insights from RCCI experts"
+  },
+  {
+    name: "Newsletter",
+    slug: "newsletter",
+    description: "Official RCCI newsletters"
+  }
+];
 
 export default function CategoriesPage() {
   const [isPending, startTransition] = useTransition();
@@ -176,60 +195,102 @@ export default function CategoriesPage() {
     });
   };
 
+  const ensureRequiredCategories = () => {
+    startTransition(async () => {
+      try {
+        let addedCount = 0;
+        
+        // Find missing required categories
+        for (const requiredCategory of REQUIRED_CATEGORIES) {
+          const exists = categories.some(cat => cat.slug === requiredCategory.slug);
+          
+          if (!exists) {
+            const formDataObj = new FormData();
+            formDataObj.append("name", requiredCategory.name);
+            formDataObj.append("slug", requiredCategory.slug);
+            formDataObj.append("description", requiredCategory.description);
+            
+            const result = await createCategory(formDataObj);
+            
+            if (result.success) {
+              setCategories(prev => [...prev, result.category]);
+              addedCount++;
+            }
+          }
+        }
+        
+        if (addedCount > 0) {
+          toast.success(`Added ${addedCount} missing required categories`);
+        } else {
+          toast.info("All required categories already exist");
+        }
+      } catch (error) {
+        console.error("Error ensuring required categories:", error);
+        toast.error("Error adding required categories");
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Categories</h2>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Category</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Category name"
-                  value={formData.name}
-                  onChange={handleNameChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
-                <Input
-                  id="slug"
-                  placeholder="category-slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (Optional)</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Category description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button onClick={handleAddCategory} disabled={isPending}>
-                {isPending ? "Adding..." : "Add Category"}
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={ensureRequiredCategories}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Add Required Categories
+          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Category
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Category</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Category name"
+                    value={formData.name}
+                    onChange={handleNameChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug">Slug</Label>
+                  <Input
+                    id="slug"
+                    placeholder="category-slug"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Category description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button onClick={handleAddCategory} disabled={isPending}>
+                  {isPending ? "Adding..." : "Add Category"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
