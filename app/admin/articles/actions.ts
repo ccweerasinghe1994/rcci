@@ -76,11 +76,11 @@ export async function createArticle(formData: FormData) {
     const excerpt = formData.get("excerpt") as string;
     const content = formData.get("content") as string;
     const authorId = formData.get("authorId") as string;
-    const category = formData.get("category") as string;
+    const categoryId = formData.get("categoryId") as string;
     const status = formData.get("status") as string;
     const file = formData.get("featuredImage") as File;
 
-    if (!title || !slug || !content || !category || !status) {
+    if (!title || !slug || !content || !categoryId || !status) {
       return { error: "Required fields are missing" };
     }
 
@@ -102,7 +102,7 @@ export async function createArticle(formData: FormData) {
         slug,
         excerpt,
         content,
-        category,
+        categoryId,
         status,
         publishedAt: status === "published" ? new Date() : null,
         authorId: authorId === "none" ? null : authorId || null,
@@ -111,6 +111,7 @@ export async function createArticle(formData: FormData) {
       include: {
         author: true,
         featuredImage: true,
+        category: true,
       },
     });
 
@@ -131,12 +132,12 @@ export async function updateArticle(formData: FormData) {
     const excerpt = formData.get("excerpt") as string;
     const content = formData.get("content") as string;
     const authorId = formData.get("authorId") as string;
-    const category = formData.get("category") as string;
+    const categoryId = formData.get("categoryId") as string;
     const status = formData.get("status") as string;
     const file = formData.get("featuredImage") as File;
     const currentImageId = formData.get("currentImageId") as string;
 
-    if (!id || !title || !slug || !content || !category || !status) {
+    if (!id || !title || !slug || !content || !categoryId || !status) {
       return { error: "Required fields are missing" };
     }
 
@@ -161,7 +162,7 @@ export async function updateArticle(formData: FormData) {
         slug,
         excerpt,
         content,
-        category,
+        categoryId,
         status,
         publishedAt: status === "published" ? new Date() : null,
         authorId: authorId === "none" ? null : authorId || null,
@@ -170,6 +171,7 @@ export async function updateArticle(formData: FormData) {
       include: {
         author: true,
         featuredImage: true,
+        category: true,
       },
     });
 
@@ -257,5 +259,20 @@ async function uploadFeaturedImage(file: File) {
   } catch (error) {
     console.error("Error uploading image:", error);
     return { error: "Failed to upload image" };
+  }
+}
+
+// Get all categories
+export async function getCategories() {
+  try {
+    const categories = await prisma.category.findMany({
+      orderBy: {
+        name: "asc",
+      },
+    });
+    return { categories };
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return { error: "Failed to fetch categories" };
   }
 }

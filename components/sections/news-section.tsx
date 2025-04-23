@@ -13,11 +13,27 @@ function limitWords(title: string, limit = 5): string {
 
 async function getLatestArticles(limit = 3) {
   try {
+    // Find the categories for news and events
+    const newsAndEventCategories = await prisma.category.findMany({
+      where: {
+        slug: { in: ["news", "events"] }
+      },
+      select: { id: true }
+    });
+    
+    // Extract the category ids
+    const categoryIds = newsAndEventCategories.map(cat => cat.id);
+    
+    // If no matching categories found, return empty array
+    if (categoryIds.length === 0) {
+      return [];
+    }
+    
     const articles = await prisma.article.findMany({
       where: {
         status: "published",
-        category: {
-          in: ["news", "events"],
+        categoryId: {
+          in: categoryIds,
         },
       },
       orderBy: {
@@ -25,6 +41,7 @@ async function getLatestArticles(limit = 3) {
       },
       include: {
         featuredImage: true,
+        category: true,
       },
       take: limit,
     })

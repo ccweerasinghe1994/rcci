@@ -103,3 +103,36 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ```bash
 docker-compose --env-file .env.local up -d postgres pgadmin
 ```
+
+# Category Migration Process
+
+To implement the Category model and migrate existing Article data, follow these steps:
+
+## Step 1: Generate the migration
+
+```bash
+npx prisma migrate dev --name add_category_model
+```
+
+## Step 2: Run the migration script to populate categories and update articles
+
+```bash
+npx tsx prisma/migrations/migrate_categories.ts
+```
+
+## Step 3: Finalize the migration (after verifying data)
+
+```sql
+-- Run these SQL commands after the migration script completes successfully:
+ALTER TABLE "Article" ALTER COLUMN "categoryId" SET NOT NULL;
+ALTER TABLE "Article" ADD CONSTRAINT "Article_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Article" DROP COLUMN "category";
+```
+
+## Step 4: Generate a new Prisma client
+
+```bash
+npx prisma generate
+```
+
+After completing these steps, all components using the Article model will need to be updated to reference `article.category.name` or `article.category.slug` instead of the previous `article.category` string value.

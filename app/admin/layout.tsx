@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { FileText, ImageIcon, LayoutDashboard, LogOut, Menu, UserCircle, Users, X } from "lucide-react"
+import { FileText, ImageIcon, LayoutDashboard, LogOut, Menu, Tag, UserCircle, Users, X } from "lucide-react"
 import Link from "next/link"
 import type React from "react"
 import { useState } from "react"
@@ -73,6 +73,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 <FileText size={20} />
                 <span>Articles</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/admin/categories"
+                className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-primary-foreground/10 transition-colors"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <Tag size={20} />
+                <span>Categories</span>
               </Link>
             </li>
             <li>

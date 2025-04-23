@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { addAuthor, getAuthors } from "../../authors/actions";
-import { createArticle } from "../actions";
+import { createArticle, getCategories } from "../actions";
 
 // Dynamically import the article editor component to avoid SSR issues
 const DynamicArticleEditor = dynamic(
@@ -46,11 +46,12 @@ export default function CreateArticlePage() {
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [authorId, setAuthorId] = useState("");
-  const [category, setCategory] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState("draft");
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null);
   const [authors, setAuthors] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
   const [newAuthor, setNewAuthor] = useState({
     name: "",
@@ -58,8 +59,9 @@ export default function CreateArticlePage() {
     biography: "",
   });
   const [isLoadingAuthors, setIsLoadingAuthors] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  // Load authors on component mount
+  // Load authors and categories on component mount
   useEffect(() => {
     const loadAuthors = async () => {
       try {
@@ -77,7 +79,24 @@ export default function CreateArticlePage() {
       }
     };
 
+    const loadCategories = async () => {
+      try {
+        const result = await getCategories();
+        if (result.categories) {
+          setCategories(result.categories);
+        } else {
+          toast.error("Failed to load categories");
+        }
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        toast.error("Error loading categories");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
     loadAuthors();
+    loadCategories();
   }, []);
 
   // Generate slug from title
@@ -150,7 +169,7 @@ export default function CreateArticlePage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !slug || !content || !category) {
+    if (!title || !slug || !content || !categoryId) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -163,7 +182,7 @@ export default function CreateArticlePage() {
         formData.append("excerpt", excerpt);
         formData.append("content", content);
         formData.append("authorId", authorId);
-        formData.append("category", category);
+        formData.append("categoryId", categoryId);
         formData.append("status", status);
         
         if (featuredImage) {
@@ -337,17 +356,26 @@ export default function CreateArticlePage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select value={category} onValueChange={setCategory}>
+                  <Select value={categoryId} onValueChange={setCategoryId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="news">News</SelectItem>
-                      <SelectItem value="events">Events</SelectItem>
-                      <SelectItem value="economy">Economy</SelectItem>
-                      <SelectItem value="dailyComments">Daily Comments</SelectItem>
-                      <SelectItem value="getStarted">Get Started</SelectItem>
-                      <SelectItem value="aboutRCCI">About RCCI</SelectItem>
+                      {isLoadingCategories ? (
+                        <SelectItem value="loading" disabled>
+                          Loading categories...
+                        </SelectItem>
+                      ) : categories.length > 0 ? (
+                        categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>
+                          No categories available
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

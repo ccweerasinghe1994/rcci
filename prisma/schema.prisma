@@ -85,6 +85,20 @@ model Authenticator {
   @@id([userId, credentialID])
 }
 
+// Category model for storing article categories
+model Category {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String  @unique
+  slug        String  @unique
+  description String? @db.Text
+
+  // Relation to Article
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // Banner model for storing banner content
 model Banner {
   id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -144,9 +158,12 @@ model Article {
   slug        String    @unique
   excerpt     String?   @db.Text
   content     String    @db.Text
-  category    String
   status      String    @default("draft") // draft or published
   publishedAt DateTime?
+
+  // Relation to Category
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String   @db.Uuid
 
   // Relation to Author
   author   Author? @relation(fields: [authorId], references: [id])
