@@ -1,10 +1,12 @@
-"use client"
-
 import { SocialShare } from "@/components/shared/SocialShare"
-import { usePathname } from "next/navigation"
+import { formatDate } from "@/lib/utils"
+import Image from "next/image"
+import Link from "next/link"
+import { getStartedArticles } from "./actions"
 
-export default function StartBusiness() {
-  const pathname = usePathname()
+export default async function StartBusiness() {
+  // Fetch getStarted articles
+  const { articles, error } = await getStartedArticles()
   
   return (
     // Content Section
@@ -14,67 +16,54 @@ export default function StartBusiness() {
         <SocialShare className="float-left mr-6" vertical={true} title="Start a Business in Rodrigues" />
 
         <div className="ml-16">
-          <h2 className="text-2xl font-bold mb-8">Start a Business in Rodrigues</h2>
+          <h2 className="text-2xl font-bold mb-4">Start a Business in Rodrigues</h2>
+          
+          <p className="text-gray-700 mb-8 max-w-3xl">
+            Rodrigues offers a vibrant business environment with opportunities across various sectors including tourism, agriculture, and sustainable industries. The RCCI provides comprehensive support to entrepreneurs at every stage of their business journey, from registration and planning to funding and growth. Below you'll find valuable resources to help you successfully establish and develop your business in Rodrigues.
+          </p>
 
-          {/* Business Registration */}
-          <div className="mb-12 border border-gray-200 rounded-lg p-6" id="business-registration">
-            <h3 className="text-xl font-bold mb-2">Business Registration Process</h3>
-            <div className="prose max-w-none">
-              <p>
-                Starting a business in Rodrigues requires following these steps for proper registration:
-              </p>
-              <ol className="list-decimal pl-5 mt-4 space-y-2">
-                <li>Choose a business structure (sole proprietorship, partnership, corporation)</li>
-                <li>Register your business name with the Registrar of Companies</li>
-                <li>Obtain a Business Registration Number (BRN)</li>
-                <li>Register for tax purposes with the Mauritius Revenue Authority</li>
-                <li>Apply for any necessary permits or licenses specific to your industry</li>
-                <li>Register with the Social Security office if you'll have employees</li>
-              </ol>
-              <p className="mt-4">
-                The RCCI can provide guidance throughout this process and connect you with the right resources.
-              </p>
-            </div>
-          </div>
-
-          {/* Business Planning */}
-          <div className="mb-12 border border-gray-200 rounded-lg p-6" id="business-planning">
-            <h3 className="text-xl font-bold mb-2">Business Planning Resources</h3>
-            <div className="prose max-w-none">
-              <p>
-                A solid business plan is essential for any new venture. The RCCI offers resources to help you develop your business plan:
-              </p>
-              <ul className="list-disc pl-5 mt-4 space-y-2">
-                <li>Business plan templates and guides</li>
-                <li>Market research assistance</li>
-                <li>Financial planning tools</li>
-                <li>Mentorship opportunities with established business owners</li>
-                <li>Workshops and seminars on business planning</li>
-              </ul>
-              <p className="mt-4">
-                Contact the RCCI office to schedule a consultation with our business advisors.
-              </p>
-            </div>
-          </div>
-
-          {/* Funding Options */}
-          <div className="mb-12 border border-gray-200 rounded-lg p-6" id="funding-options">
-            <h3 className="text-xl font-bold mb-2">Funding and Financial Support</h3>
-            <div className="prose max-w-none">
-              <p>
-                Explore various funding options available to entrepreneurs in Rodrigues:
-              </p>
-              <ul className="list-disc pl-5 mt-4 space-y-2">
-                <li>Government grants and subsidies for small businesses</li>
-                <li>Small business loans from local banks and credit unions</li>
-                <li>Microfinance programs</li>
-                <li>Angel investors and venture capital options</li>
-                <li>Crowdfunding platforms</li>
-              </ul>
-              <p className="mt-4">
-                The RCCI can help connect you with financial institutions and inform you about available government support programs.
-              </p>
-            </div>
+          {/* Articles Section */}
+          <div className="mt-12">
+            <h3 className="text-xl font-bold mb-6">Resources & Articles</h3>
+            
+            {error ? (
+              <div className="text-red-500">Failed to load articles</div>
+            ) : articles.length > 0 ? (
+              <div className="space-y-6">
+                {articles.map((article) => (
+                  <div key={article.id} className="border-b border-gray-200 pb-6">
+                    <div className="flex gap-4">
+                      {article.featuredImage && (
+                        <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
+                          <Image
+                            src={article.featuredImage.path}
+                            alt={article.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <Link href={`/articles/${article.slug}`} className="block hover:underline">
+                          <h3 className="text-lg font-bold mb-1">{article.title}</h3>
+                        </Link>
+                        <div className="text-gray-600 mb-1">{article.author?.name || "RCCI"}</div>
+                        <div className="text-gray-500 text-sm">
+                          {article.publishedAt ? formatDate(new Date(article.publishedAt)) : formatDate(new Date(article.createdAt))}
+                        </div>
+                        {article.excerpt && (
+                          <p className="text-gray-600 text-sm mt-2">{article.excerpt}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-gray-500 p-4 bg-gray-50 rounded-lg">
+                No articles available at the moment. Check back soon for resources to help start your business.
+              </div>
+            )}
           </div>
         </div>
       </div>
