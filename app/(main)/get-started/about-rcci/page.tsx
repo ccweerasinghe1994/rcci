@@ -1,10 +1,12 @@
-"use client"
-
 import { SocialShare } from "@/components/shared/SocialShare"
-import { usePathname } from "next/navigation"
+import { formatDate } from "@/lib/utils"
+import Image from "next/image"
+import Link from "next/link"
+import { getAboutRCCIArticles } from "./actions"
 
-export default function AboutRCCI() {
-  const pathname = usePathname()
+export default async function AboutRCCI() {
+  // Fetch aboutRCCI articles
+  const { articles, error } = await getAboutRCCIArticles()
   
   return (
     // Content Section
@@ -14,78 +16,59 @@ export default function AboutRCCI() {
         <SocialShare className="float-left mr-6" vertical={true} title="About RCCI" />
 
         <div className="ml-16">
-          <h2 className="text-2xl font-bold mb-8">About the Rodrigues Chamber of Commerce and Industry</h2>
-
-          {/* Mission & Vision */}
-          <div className="mb-12 border border-gray-200 rounded-lg p-6" id="mission-vision">
-            <h3 className="text-xl font-bold mb-2">Our Mission & Vision</h3>
-            <div className="prose max-w-none">
-              <p>
-                The Rodrigues Chamber of Commerce and Industry (RCCI) is dedicated to fostering a vibrant business 
-                community and sustainable economic growth in Rodrigues. We serve as the voice of the private sector, 
-                representing businesses of all sizes across various industries.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div className="bg-blue-50 p-4 rounded-md">
-                  <h4 className="font-semibold mb-2">Our Mission</h4>
-                  <p>
-                    To promote and protect the interests of the business community in Rodrigues by providing advocacy, 
-                    networking opportunities, and resources that enhance business growth and contribute to the island's 
-                    economic development.
-                  </p>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-md">
-                  <h4 className="font-semibold mb-2">Our Vision</h4>
-                  <p>
-                    To be the leading organization that drives sustainable economic prosperity in Rodrigues through 
-                    innovation, collaboration, and responsible business practices.
-                  </p>
-                </div>
+          <h2 className="text-2xl font-bold mb-4">About the Rodrigues Chamber of Commerce and Industry</h2>
+          
+          <p className="text-gray-700 mb-8 max-w-3xl">
+            The Rodrigues Chamber of Commerce and Industry (RCCI) is dedicated to fostering a vibrant business 
+            community and sustainable economic growth in Rodrigues. As the voice of the private sector, we represent businesses 
+            of all sizes across various industries, advocating for policies that support business growth, facilitating 
+            training programs, and creating platforms for business networking and collaboration. Our mission is to promote 
+            and protect the interests of the business community while driving sustainable economic prosperity through innovation 
+            and responsible business practices.
+          </p>
+          
+          {/* Articles Section */}
+          <div className="mt-12">
+            <h3 className="text-xl font-bold mb-6">Learn More About RCCI</h3>
+            
+            {error ? (
+              <div className="text-red-500">Failed to load articles</div>
+            ) : articles.length > 0 ? (
+              <div className="space-y-6">
+                {articles.map((article) => (
+                  <div key={article.id} className="border-b border-gray-200 pb-6">
+                    <div className="flex gap-4">
+                      {article.featuredImage && (
+                        <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
+                          <Image
+                            src={article.featuredImage.path}
+                            alt={article.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <Link href={`/articles/${article.slug}`} className="block hover:underline">
+                          <h3 className="text-lg font-bold mb-1">{article.title}</h3>
+                        </Link>
+                        <div className="text-gray-600 mb-1">{article.author?.name || "RCCI"}</div>
+                        <div className="text-gray-500 text-sm">
+                          {article.publishedAt ? formatDate(new Date(article.publishedAt)) : formatDate(new Date(article.createdAt))}
+                        </div>
+                        {article.excerpt && (
+                          <p className="text-gray-600 text-sm mt-2">{article.excerpt}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
-
-          {/* History */}
-          <div className="mb-12 border border-gray-200 rounded-lg p-6" id="history">
-            <h3 className="text-xl font-bold mb-2">Our History</h3>
-            <div className="prose max-w-none">
-              <p>
-                Founded in 1996, the RCCI has played a pivotal role in the economic development of Rodrigues for 
-                more than 25 years. What began as a small association of local businesses has grown into a 
-                comprehensive chamber representing hundreds of businesses across the island.
-              </p>
-              <p className="mt-4">
-                Throughout our history, we have advocated for policies that support business growth, facilitated 
-                training and development programs, and created platforms for business networking and collaboration. 
-                Our organization has been instrumental in helping Rodrigues businesses adapt to changing economic 
-                landscapes and embrace new opportunities.
-              </p>
-            </div>
-          </div>
-
-          {/* Leadership & Structure */}
-          <div className="mb-12 border border-gray-200 rounded-lg p-6" id="leadership">
-            <h3 className="text-xl font-bold mb-2">Leadership & Structure</h3>
-            <div className="prose max-w-none">
-              <p>
-                The RCCI is led by a Board of Directors elected by our members. Our board represents diverse sectors 
-                of the economy and brings a wealth of business experience to guide our organization.
-              </p>
-              <div className="mt-6">
-                <h4 className="font-semibold mb-3">Our Leadership Team:</h4>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li><strong>Mr. Sajith Wijenayake</strong> - President</li>
-                  <li><strong>Mr. P. M. Abeysekara</strong> - Vice President</li>
-                  <li><strong>Mr. Shaameel Mohideen</strong> - Vice President</li>
-                  <li><strong>Mr. Mahen Kariyawasan</strong> - Immediate Past President</li>
-                </ul>
+            ) : (
+              <div className="text-gray-500 p-4 bg-gray-50 rounded-lg">
+                No articles available at the moment. Check back soon for more information about RCCI.
               </div>
-              <p className="mt-4">
-                Our operations are organized into several committees focusing on key areas such as Trade & 
-                Investment, Tourism, Agriculture, Education & Training, and Sustainability.
-              </p>
-            </div>
+            )}
           </div>
         </div>
       </div>
