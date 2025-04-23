@@ -1,11 +1,16 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import HeroBanner from "@/components/sections/HeroBanner"
 import { SocialShare } from "@/components/shared/SocialShare"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
 
 export default function GetStarted() {
+  const pathname = usePathname()
+  
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
@@ -16,13 +21,22 @@ export default function GetStarted() {
         <section className="border-b border-gray-200 py-4">
           <div className="container">
             <div className="flex gap-8">
-              <Link href="/get-started/start-business" className="text-primary hover:underline">
+              <Link 
+                href="/get-started/start-business" 
+                className={`${pathname === '/get-started/start-business' ? 'text-primary font-semibold underline' : 'text-primary hover:underline'}`}
+              >
                 Start a business
               </Link>
-              <Link href="/get-started/about-rcci" className="text-primary hover:underline">
+              <Link 
+                href="/get-started/about-rcci" 
+                className={`${pathname === '/get-started/about-rcci' ? 'text-primary font-semibold underline' : 'text-primary hover:underline'}`}
+              >
                 About RCCI
               </Link>
-              <Link href="/join" className="text-primary hover:underline">
+              <Link 
+                href="/join" 
+                className={`${pathname === '/join' ? 'text-primary font-semibold underline' : 'text-primary hover:underline'}`}
+              >
                 Join the RCCI
               </Link>
             </div>

@@ -1,10 +1,15 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import HeroBanner from "@/components/sections/HeroBanner"
 import { SocialShare } from "@/components/shared/SocialShare"
+import { usePathname } from "next/navigation"
 
 export default function AboutRCCI() {
+  const pathname = usePathname()
+  
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
@@ -15,13 +20,22 @@ export default function AboutRCCI() {
         <section className="border-b border-gray-200 py-4">
           <div className="container">
             <div className="flex gap-8">
-              <Link href="/get-started" className="text-primary hover:underline">
+              <Link 
+                href="/get-started" 
+                className={`${pathname === '/get-started' ? 'text-primary font-semibold underline' : 'text-primary hover:underline'}`}
+              >
                 Get Started
               </Link>
-              <Link href="/get-started/start-business" className="text-primary hover:underline">
+              <Link 
+                href="/get-started/start-business" 
+                className={`${pathname === '/get-started/start-business' ? 'text-primary font-semibold underline' : 'text-primary hover:underline'}`}
+              >
                 Start a Business
               </Link>
-              <Link href="/join" className="text-primary hover:underline">
+              <Link 
+                href="/join" 
+                className={`${pathname === '/join' ? 'text-primary font-semibold underline' : 'text-primary hover:underline'}`}
+              >
                 Join the RCCI
               </Link>
             </div>
