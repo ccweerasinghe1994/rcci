@@ -5,13 +5,13 @@ import React, { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -345,10 +345,11 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="news">News</SelectItem>
-                      <SelectItem value="event">Event</SelectItem>
-                      <SelectItem value="press">Press Release</SelectItem>
-                      <SelectItem value="blog">Blog</SelectItem>
+                    <SelectItem value="news">News</SelectItem>
+                      <SelectItem value="events">Events</SelectItem>
+                      <SelectItem value="economy">Economy</SelectItem>
+                      <SelectItem value="dailyComments">Daily Comments</SelectItem>
+                      <SelectItem value="getStarted">Get Started</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

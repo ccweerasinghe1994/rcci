@@ -346,6 +346,7 @@ export default function CreateArticlePage() {
                       <SelectItem value="events">Events</SelectItem>
                       <SelectItem value="economy">Economy</SelectItem>
                       <SelectItem value="dailyComments">Daily Comments</SelectItem>
+                      <SelectItem value="getStarted">Get Started</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
