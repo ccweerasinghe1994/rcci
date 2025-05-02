@@ -1,8 +1,8 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { prisma } from "@/prisma"
-import { formatDistanceToNow } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
+import SubHeading from "../shared/SubHeading"
 
 // Helper function to limit words in a title
 function limitWords(title: string, limit = 5): string {
@@ -57,12 +57,8 @@ export async function NewsSection() {
 
   return (
     <section className="py-16 md:py-24">
-      <div className="container">
         <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Latest RCCI News & Events</h2>
-          <Link href="/news-media" className="text-primary hover:underline mt-4 md:mt-0">
-            View all news
-          </Link>
+          <SubHeading>Latest RCCI News & Events</SubHeading>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {latestArticles?.length > 0 ? (
@@ -71,14 +67,20 @@ export async function NewsSection() {
                 <CardHeader>
                   <CardTitle title={article.title}>{limitWords(article.title)}</CardTitle>
                   <CardDescription>
-                    {article.publishedAt
+                    {/* {article.publishedAt
                       ? formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })
-                      : ""}
+                      : ""} */}
+                         <p className="line-clamp-3">
+                    {article.excerpt || article.content.replace(/<[^>]+>/g, "").substring(0, 150) + "..."}
+                  </p>
+                      <Link href={`/articles/${article.slug}`} className="text-primary hover:underline">
+                    Read more
+                  </Link>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {article.featuredImage && (
-                    <div className="aspect-video relative mb-4 overflow-hidden rounded-lg">
+                    <div className="aspect-video relative overflow-hidden">
                       <Image
                         src={article.featuredImage.path}
                         alt={article.title}
@@ -92,14 +94,10 @@ export async function NewsSection() {
                       <span className="text-gray-400">No image</span>
                     </div>
                   )}
-                  <p className="line-clamp-3">
-                    {article.excerpt || article.content.replace(/<[^>]+>/g, "").substring(0, 150) + "..."}
-                  </p>
+               
                 </CardContent>
                 <CardFooter>
-                  <Link href={`/articles/${article.slug}`} className="text-primary hover:underline">
-                    Read more
-                  </Link>
+                  
                 </CardFooter>
               </Card>
             ))
@@ -115,7 +113,7 @@ export async function NewsSection() {
               </Card>
             </>
           )}
-        </div>
+ 
       </div>
     </section>
   )

@@ -2,6 +2,7 @@ import { prisma } from "@/prisma"
 import { formatDistanceToNow } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
+import SubHeading from "../shared/SubHeading"
 // Helper to split HTML content into roughly equal word columns
 function splitHtmlContentIntoColumns(html: string, numCols: number, maxWordsPerCol: number, hasImage: boolean = false) {
   // For column splitting, we need to work with plain text to count words
@@ -151,10 +152,10 @@ export async function DailyCommentSection() {
   const hasThirdColumn = columns[2] && columns[2].trim().length > 0
 
   return (
-    <section className="py-12 md:py-16 bg-gray-50">
-      <div className="container">
+    <section className="py-12 md:py-16">
+      <div className="">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold">The Daily Comment</h2>
+          <SubHeading>The Daily Comment</SubHeading>
           <span className="text-sm text-gray-500">{formattedDate}</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -164,7 +165,7 @@ export async function DailyCommentSection() {
               <div className="article-content">
               {
               latestArticle.featuredImage &&
-                <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden mb-3">
+                <div className="relative aspect-[4/3] w-full overflow-hidden mb-3">
                   <Image
                     src={latestArticle.featuredImage.path}
                     alt={latestArticle.title}
