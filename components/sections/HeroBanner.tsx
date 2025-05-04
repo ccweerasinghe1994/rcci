@@ -89,13 +89,13 @@ export default function HeroBanner({ type = "hero" }: HeroBannerProps) {
   return (
     <section className="relative bg-[#001a3a] text-white">
       <div className="container flex">
-      <div className="w-full md:w-1/2 py-16 md:py-20 space-y-6 z-10">
-      <h1 className="text-4xl font-bold">{bannerData.title}</h1>
+      <div className="w-full md:w-1/2 py-8 md:py-10 space-y-3 z-10">
+      <h1 className="text-[32px] font-bold">{bannerData.title}</h1>
           <p className="text-base">{bannerData.content}</p>
           <div className="pt-4">
           <Link
               href={bannerData.buttonLink}
-              className="inline-block border border-white px-8 py-3 uppercase font-medium tracking-wide hover:bg-white hover:text-[#001a3a] transition-colors"
+              className="inline-block border border-white px-8 py-3 uppercase font-[15px] tracking-wide hover:bg-white hover:text-[#001a3a] transition-colors"
             >
               {bannerData.buttonText}
             </Link>

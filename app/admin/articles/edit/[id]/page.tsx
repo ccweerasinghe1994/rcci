@@ -1,9 +1,15 @@
-"use client"
+"use client";
 import "quill/dist/quill.snow.css";
-import React, { useEffect, useState, useTransition } from "react";
+import React, { use, useEffect, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -15,7 +21,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ExternalLink, ImageIcon, Plus, Trash } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -28,7 +40,8 @@ import { getArticleById, getCategories, updateArticle } from "../../actions";
 
 // Dynamically import the article editor component to avoid SSR issues
 const DynamicArticleEditor = dynamic(
-  () => import("@/components/ui/article-editor").then((mod) => mod.ArticleEditor),
+  () =>
+    import("@/components/ui/article-editor").then((mod) => mod.ArticleEditor),
   {
     ssr: false,
     loading: () => (
@@ -46,14 +59,18 @@ interface ArticleEditorProps {
   initialContent?: string;
 }
 
-export default function EditArticlePage({ params }: { params: { id: string } }) {
+export default function EditArticlePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
   // Unwrap params using React.use() with proper typing
-  const { id } = React.use(params as any) as { id: string };
-  
+  const { id } = use(params);
+
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -62,9 +79,11 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState("draft");
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
-  const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null);
+  const [featuredImagePreview, setFeaturedImagePreview] = useState<
+    string | null
+  >(null);
   const [currentImageId, setCurrentImageId] = useState<string | null>(null);
-  
+
   const [authors, setAuthors] = useState<any[]>([]);
   const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
   const [newAuthor, setNewAuthor] = useState({
@@ -90,7 +109,7 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
           setAuthorId(article.authorId || "none");
           setCategoryId(article.categoryId || "");
           setStatus(article.status);
-          
+
           if (article.featuredImage) {
             setFeaturedImagePreview(article.featuredImage.path);
             setCurrentImageId(article.featuredImage.id);
@@ -158,7 +177,7 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
-    
+
     // Only auto-generate slug if it's a new article or the slug hasn't been manually edited
     if (!id || slug === generateSlug(title)) {
       setSlug(generateSlug(newTitle));
@@ -241,11 +260,11 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
         formData.append("authorId", authorId);
         formData.append("categoryId", categoryId);
         formData.append("status", status);
-        
+
         if (currentImageId) {
           formData.append("currentImageId", currentImageId);
         }
-        
+
         if (featuredImage) {
           formData.append("featuredImage", featuredImage);
         }
@@ -277,14 +296,22 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => router.push("/admin/articles")}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.push("/admin/articles")}
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h2 className="text-3xl font-bold tracking-tight">Edit Article</h2>
         </div>
-        
+
         <Button asChild variant="outline" size="sm">
-          <Link href={`/articles/${slug}`} target="_blank" className="flex items-center gap-2">
+          <Link
+            href={`/articles/${slug}`}
+            target="_blank"
+            className="flex items-center gap-2"
+          >
             <ExternalLink className="h-4 w-4" />
             View Article
           </Link>
@@ -330,9 +357,9 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="content">Content</Label>
-                  <DynamicArticleEditor 
-                    content={content} 
-                    onChange={setContent} 
+                  <DynamicArticleEditor
+                    content={content}
+                    onChange={setContent}
                   />
                 </div>
               </CardContent>
@@ -385,9 +412,19 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                 <div className="space-y-2">
                   <Label htmlFor="author">Author</Label>
                   <div className="flex space-x-2">
-                    <Select value={authorId} onValueChange={setAuthorId} disabled={isLoadingAuthors}>
+                    <Select
+                      value={authorId}
+                      onValueChange={setAuthorId}
+                      disabled={isLoadingAuthors}
+                    >
                       <SelectTrigger id="author" className="flex-1">
-                        <SelectValue placeholder={isLoadingAuthors ? "Loading authors..." : "Select author"} />
+                        <SelectValue
+                          placeholder={
+                            isLoadingAuthors
+                              ? "Loading authors..."
+                              : "Select author"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
@@ -398,7 +435,10 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                         ))}
                       </SelectContent>
                     </Select>
-                    <Dialog open={isAddAuthorOpen} onOpenChange={setIsAddAuthorOpen}>
+                    <Dialog
+                      open={isAddAuthorOpen}
+                      onOpenChange={setIsAddAuthorOpen}
+                    >
                       <DialogTrigger asChild>
                         <Button variant="outline" size="icon">
                           <Plus className="h-4 w-4" />
@@ -414,7 +454,12 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                             <Input
                               id="author-name"
                               value={newAuthor.name}
-                              onChange={(e) => setNewAuthor({ ...newAuthor, name: e.target.value })}
+                              onChange={(e) =>
+                                setNewAuthor({
+                                  ...newAuthor,
+                                  name: e.target.value,
+                                })
+                              }
                               placeholder="Author name"
                             />
                           </div>
@@ -423,7 +468,12 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                             <Input
                               id="author-position"
                               value={newAuthor.position}
-                              onChange={(e) => setNewAuthor({ ...newAuthor, position: e.target.value })}
+                              onChange={(e) =>
+                                setNewAuthor({
+                                  ...newAuthor,
+                                  position: e.target.value,
+                                })
+                              }
                               placeholder="Author position"
                             />
                           </div>
@@ -432,7 +482,12 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                             <Textarea
                               id="author-bio"
                               value={newAuthor.biography}
-                              onChange={(e) => setNewAuthor({ ...newAuthor, biography: e.target.value })}
+                              onChange={(e) =>
+                                setNewAuthor({
+                                  ...newAuthor,
+                                  biography: e.target.value,
+                                })
+                              }
                               placeholder="Author biography"
                             />
                           </div>
@@ -441,7 +496,11 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                           <DialogClose asChild>
                             <Button variant="outline">Cancel</Button>
                           </DialogClose>
-                          <Button type="button" onClick={handleAddAuthor} disabled={isPending}>
+                          <Button
+                            type="button"
+                            onClick={handleAddAuthor}
+                            disabled={isPending}
+                          >
                             Add Author
                           </Button>
                         </DialogFooter>
@@ -461,7 +520,11 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                   <div className="space-y-2">
                     <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200">
                       <Image
-                        src={featuredImagePreview.startsWith('data:') ? featuredImagePreview : featuredImagePreview}
+                        src={
+                          featuredImagePreview.startsWith("data:")
+                            ? featuredImagePreview
+                            : featuredImagePreview
+                        }
                         alt="Featured image preview"
                         fill
                         className="object-cover"
@@ -479,7 +542,9 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                       </Button>
                     </div>
                     <p className="text-xs text-gray-500">
-                      {featuredImage ? featuredImage.name : "Current featured image"}
+                      {featuredImage
+                        ? featuredImage.name
+                        : "Current featured image"}
                     </p>
                   </div>
                 ) : (
@@ -488,7 +553,9 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                       <ImageIcon className="h-6 w-6 text-gray-400" />
                     </div>
                     <div className="text-center">
-                      <p className="text-sm text-gray-500">No featured image selected</p>
+                      <p className="text-sm text-gray-500">
+                        No featured image selected
+                      </p>
                       <p className="text-xs text-gray-400">
                         Supported formats: JPEG, PNG, GIF, WebP. Max size: 5MB.
                       </p>
@@ -510,7 +577,12 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
                 )}
                 {featuredImagePreview && (
                   <label className="cursor-pointer text-center block">
-                    <Button variant="outline" type="button" size="sm" className="w-full">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      size="sm"
+                      className="w-full"
+                    >
                       Change Image
                     </Button>
                     <Input
@@ -526,7 +598,11 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
             </Card>
 
             <CardFooter className="flex justify-between border rounded-lg p-6">
-              <Button variant="outline" type="button" onClick={() => router.push("/admin/articles")}>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => router.push("/admin/articles")}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
@@ -538,4 +614,4 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
       </form>
     </div>
   );
-} 
+}

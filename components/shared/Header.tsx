@@ -22,11 +22,11 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="container flex h-16 items-center justify-between">
+    <header className="w-full bg-white mt-10 xl:px-0 lg:px-2 md:px-4 sm:px-6">
+        <div className="max-w-[1170px]  mx-auto flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href={"/"}>
-            <Image src={"/images/rccilogo.svg"} alt="RCCI Logo" width={494} height={100} />
+            <Image className="aspect-auto" src={"/images/rccilogo.svg"} alt="RCCI Logo" width={494} height={100} />
             </Link>
           </div>
           
@@ -127,12 +127,12 @@ export default function Header() {
         </div>
         
         {/* Navigation Tabs - visible only on desktop */}
-        <div className="hidden md:block border-t border-gray-200">
-          <div className="container flex h-12">
+        <div className="max-w-[1170px] mt-8 mx-auto border-t border-gray-200">
+          <div className="flex h-12">
             <nav className="flex">
               <Link
                 href="/get-started"
-                className={`flex items-center px-4 font-medium ${isActive('/get-started') 
+                className={`flex items-center font-medium ${isActive('/get-started') 
                   ? 'text-primary border-b-2 border-primary' 
                   : 'text-gray-600 hover:text-primary'}`}
               >

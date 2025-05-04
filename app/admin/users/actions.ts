@@ -91,11 +91,12 @@ export async function updateUserStatus(userId: string, status: string) {
   }
 
   // Update user status
-  //   await prisma.user.update({
-  //     where: { id: userId },
-  //     data: {  },
-  //   });
+  await prisma.user.update({
+    where: { id: userId },
+    data: { status },
+  });
 
+  revalidatePath("/admin/users");
   return { success: true };
 }
 

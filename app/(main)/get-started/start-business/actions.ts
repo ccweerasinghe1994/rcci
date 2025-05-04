@@ -1,9 +1,21 @@
 "use server";
 
+import { Article, Author, Category, Image } from "@/lib/generated/prisma";
 import { prisma } from "@/prisma";
 
+export type ArticleWithAuthorAndCategory = Article & {
+  author: Author | null;
+  featuredImage: Image | null;
+  category: Category;
+};
+// Define return type for the function
+type GetStartedArticlesReturn = {
+  articles: ArticleWithAuthorAndCategory[];
+  error?: string;
+};
+
 // Get all getStarted articles
-export async function getStartedArticles() {
+export async function getStartedArticles(): Promise<GetStartedArticlesReturn> {
   try {
     // First, find the Category with slug "get-started"
     const getStartedCategory = await prisma.category.findUnique({

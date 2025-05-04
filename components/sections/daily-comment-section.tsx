@@ -154,11 +154,12 @@ export async function DailyCommentSection() {
   return (
     <section className="py-12 md:py-16">
       <div className="">
-        <div className="flex justify-between items-center mb-8">
+        {/* <div className="flex justify-between items-center mb-8"> */}
           <SubHeading>The Daily Comment</SubHeading>
-          <span className="text-sm text-gray-500">{formattedDate}</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* <span className="text-sm text-gray-500">{formattedDate}</span> */}
+        {/* </div> */}
+    <div className="w-full px-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* First column: image, title, author, and first column text */}
           <div className="flex flex-col">
             <div className="prose max-w-none mt-3">
@@ -216,6 +217,7 @@ export async function DailyCommentSection() {
             </div>
           )}
         </div>
+    </div>
       </div>
     </section>
   )

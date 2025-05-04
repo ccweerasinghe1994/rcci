@@ -1,18 +1,24 @@
-import { Search, SlidersHorizontal } from "lucide-react"
-import { Metadata } from "next"
-import { Suspense } from "react"
+import { Search, SlidersHorizontal } from "lucide-react";
+import { Metadata } from "next";
+import { Suspense } from "react";
 
-import { UsersTable } from "@/components/tables/UsersTable"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { UsersTable } from "@/components/tables/UsersTable";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetClose,
@@ -21,100 +27,97 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import { Skeleton } from "@/components/ui/skeleton"
-import { prisma } from "@/prisma"
-import { resetFilters } from "./actions"
-import { FilterIndicator } from "./filter-indicator"
-
+} from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
+import { prisma } from "@/prisma";
+import { resetFilters } from "./actions";
+import { FilterIndicator } from "./filter-indicator";
 
 export const metadata: Metadata = {
   title: "User Management | Admin Dashboard",
   description: "Manage users of the RCCI platform",
-}
+};
 
 interface UsersPageProps {
-  searchParams: {
-    search?: string
-    status?: string
-    role?: string
-    membershipType?: string
-    page?: string
-  }
+  searchParams: Promise<{
+    search?: string;
+    status?: string;
+    role?: string;
+    membershipType?: string;
+    page?: string;
+  }>;
 }
 
-async function getUsers(params: UsersPageProps["searchParams"]) {
-  const search = params.search
-  const status = params.status
-  const role = params.role
-  const membershipType = params.membershipType
-  const page = params.page
-  
-  const pageNumber = page ? parseInt(page) : 1
-  const pageSize = 10
-  const skip = (pageNumber - 1) * pageSize
+async function getUsers(params: Awaited<UsersPageProps["searchParams"]>) {
+  const { search, status, role, membershipType, page } = params;
+
+  const pageNumber = page ? parseInt(page) : 1;
+  const pageSize = 10;
+  const skip = (pageNumber - 1) * pageSize;
 
   // Build up the query filters
-  const where: any = {}
-  
+  const where: any = {};
+
   if (search) {
     where.OR = [
-      { name: { contains: search, mode: 'insensitive' } },
-      { email: { contains: search, mode: 'insensitive' } }
-    ]
+      { name: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+    ];
   }
-  
-  if (status && status !== 'all') {
-    where.status = status
+
+  if (status && status !== "all") {
+    where.status = status;
   }
-  
-  if (role && role !== 'all') {
-    where.role = role
+
+  if (role && role !== "all") {
+    where.role = role;
   }
-  
-  if (membershipType && membershipType !== 'all') {
-    where.membershipType = membershipType
+
+  if (membershipType && membershipType !== "all") {
+    where.membershipType = membershipType;
   }
 
   // Get users with pagination
   const users = await prisma.user.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     skip,
     take: pageSize,
-  })
+  });
 
   // Get total count for pagination
-  const totalUsers = await prisma.user.count({ where })
-  const totalPages = Math.ceil(totalUsers / pageSize)
+  const totalUsers = await prisma.user.count({ where });
+  const totalPages = Math.ceil(totalUsers / pageSize);
 
   return {
     users,
     totalPages,
-    currentPage: pageNumber
-  }
+    currentPage: pageNumber,
+  };
 }
 
-async function UsersContent({ searchParams }: UsersPageProps) {
-  const { users, totalPages, currentPage } = await getUsers(searchParams)
-  
+async function UsersContent(props: UsersPageProps) {
+  const searchParams = await props.searchParams;
+  const { users, totalPages, currentPage } = await getUsers(searchParams);
+
   return (
-    <UsersTable 
-      users={users} 
-      totalPages={totalPages} 
-      currentPage={currentPage} 
+    <UsersTable
+      users={users}
+      totalPages={totalPages}
+      currentPage={currentPage}
       searchParams={searchParams}
     />
-  )
+  );
 }
 
 // Server component
 export default async function UsersPage({ searchParams }: UsersPageProps) {
-  const search = searchParams.search
-  const status = searchParams.status
-  const role = searchParams.role
-  const membershipType = searchParams.membershipType
-  
+  const params = await searchParams;
+  const search = params.search;
+  const status = params.status;
+  const role = params.role;
+  const membershipType = params.membershipType;
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -139,14 +142,14 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <form method="GET">
                 {/* Preserve existing filters */}
-                {status && (
-                  <input type="hidden" name="status" value={status} />
-                )}
-                {role && (
-                  <input type="hidden" name="role" value={role} />
-                )}
+                {status && <input type="hidden" name="status" value={status} />}
+                {role && <input type="hidden" name="role" value={role} />}
                 {membershipType && (
-                  <input type="hidden" name="membershipType" value={membershipType} />
+                  <input
+                    type="hidden"
+                    name="membershipType"
+                    value={membershipType}
+                  />
                 )}
                 <Input
                   name="search"
@@ -162,10 +165,10 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                   <Button variant="outline" size="sm">
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
                     Filters
-                    <FilterIndicator 
-                      status={status} 
-                      role={role} 
-                      membershipType={membershipType} 
+                    <FilterIndicator
+                      status={status}
+                      role={role}
+                      membershipType={membershipType}
                     />
                   </Button>
                 </SheetTrigger>
@@ -176,22 +179,19 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                       Apply filters to narrow down the list of users.
                     </SheetDescription>
                   </SheetHeader>
-                  
+
                   <div className="space-y-4 py-4 px-4">
                     <form method="GET" className="space-y-6">
                       {/* Preserve search term if present */}
                       {search && (
                         <input type="hidden" name="search" value={search} />
                       )}
-                      
+
                       <div className="space-y-2">
                         <label htmlFor="status" className="text-sm font-medium">
                           Status
                         </label>
-                        <Select
-                          name="status"
-                          defaultValue={status || "all"}
-                        >
+                        <Select name="status" defaultValue={status || "all"}>
                           <SelectTrigger id="status" className="w-full">
                             <SelectValue placeholder="All Statuses" />
                           </SelectTrigger>
@@ -207,10 +207,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                         <label htmlFor="role" className="text-sm font-medium">
                           Role
                         </label>
-                        <Select
-                          name="role"
-                          defaultValue={role || "all"}
-                        >
+                        <Select name="role" defaultValue={role || "all"}>
                           <SelectTrigger id="role" className="w-full">
                             <SelectValue placeholder="All Roles" />
                           </SelectTrigger>
@@ -223,7 +220,10 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <label htmlFor="membershipType" className="text-sm font-medium">
+                        <label
+                          htmlFor="membershipType"
+                          className="text-sm font-medium"
+                        >
                           Membership Type
                         </label>
                         <Select
@@ -243,10 +243,12 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                         </Select>
                       </div>
                       <div className="flex items-center gap-2 pt-6">
-                        <Button type="submit" className="flex-1">Apply Filters</Button>
+                        <Button type="submit" className="flex-1">
+                          Apply Filters
+                        </Button>
                       </div>
                     </form>
-                    
+
                     <div className="pt-4 border-t mt-4">
                       <form action={resetFilters}>
                         {search && (
@@ -268,14 +270,14 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
               </Sheet>
             </div>
           </div>
-          
+
           <Suspense fallback={<UsersTableSkeleton />}>
             <UsersContent searchParams={searchParams} />
           </Suspense>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 function UsersTableSkeleton() {
@@ -310,5 +312,5 @@ function UsersTableSkeleton() {
         <Skeleton className="h-10 w-[350px]" />
       </div>
     </div>
-  )
+  );
 }
