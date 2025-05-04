@@ -1,5 +1,6 @@
 import { getArticleBySlug, getArticles } from "@/app/admin/articles/actions";
 import HeroBanner from "@/components/sections/HeroBanner";
+import AuthorList from "@/components/shared/AuthorList";
 import { SocialShare } from "@/components/shared/SocialShare";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -19,7 +20,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Params }) {
-  const { slug } = await params
+  const { slug } = await params;
   const { article } = await getArticleBySlug(slug);
 
   if (!article) {
@@ -141,6 +142,9 @@ export default async function ArticlePage({ params }: { params: Params }) {
                     className="prose max-w-none article-content"
                     dangerouslySetInnerHTML={{ __html: article.content }}
                   />
+
+                  {/* Author Information */}
+                  {article.author && <AuthorList authors={[article.author]} />}
                 </div>
               </div>
 

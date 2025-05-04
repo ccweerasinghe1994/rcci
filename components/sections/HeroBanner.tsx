@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { getBannerData } from "@/app/admin/banner/action"
-import Image from "next/image"
-import Link from "next/link"
-import { useEffect, useState } from "react"
+import { getBannerData } from "@/app/admin/banner/action";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface BannerData {
-  title: string
-  content: string
-  buttonText: string
-  buttonLink: string
-  imageUrl: string
-  type: string
+  title: string;
+  content: string;
+  buttonText: string;
+  buttonLink: string;
+  imageUrl: string;
+  type: string;
 }
 
 // Default banner data as fallback
@@ -23,7 +23,7 @@ const defaultBannerData: Record<string, BannerData> = {
     buttonText: "JOIN THE CHAMBER",
     buttonLink: "/join",
     imageUrl: "/placeholder.svg?height=600&width=800",
-    type: "hero"
+    type: "hero",
   },
   "get-started": {
     title: "Get Started with RCCI",
@@ -32,7 +32,7 @@ const defaultBannerData: Record<string, BannerData> = {
     buttonText: "LEARN MORE",
     buttonLink: "/get-started#benefits",
     imageUrl: "/placeholder.svg?height=600&width=800",
-    type: "get-started"
+    type: "get-started",
   },
   "news-media": {
     title: "News & Media",
@@ -41,34 +41,36 @@ const defaultBannerData: Record<string, BannerData> = {
     buttonText: "VIEW ALL",
     buttonLink: "/news-media",
     imageUrl: "/placeholder.svg?height=600&width=800",
-    type: "news-media"
+    type: "news-media",
   },
-}
+};
 
 interface HeroBannerProps {
-  type?: string
+  type?: string;
 }
 
 export default function HeroBanner({ type = "hero" }: HeroBannerProps) {
-  const [bannerData, setBannerData] = useState<BannerData>(defaultBannerData[type] || defaultBannerData.hero)
-  const [isLoading, setIsLoading] = useState(true)
+  const [bannerData, setBannerData] = useState<BannerData>(
+    defaultBannerData[type] || defaultBannerData.hero
+  );
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchBannerData = async () => {
       try {
-        setIsLoading(true)
-        const data = await getBannerData(type)
-        setBannerData(data)
+        setIsLoading(true);
+        const data = await getBannerData(type);
+        setBannerData(data);
       } catch (error) {
-        console.error(`Error fetching banner data for type ${type}:`, error)
+        console.error(`Error fetching banner data for type ${type}:`, error);
         // Fall back to default data on error
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchBannerData()
-  }, [type])
+    fetchBannerData();
+  }, [type]);
 
   if (isLoading) {
     return (
@@ -83,39 +85,40 @@ export default function HeroBanner({ type = "hero" }: HeroBannerProps) {
           </div>
         </div>
       </section>
-    )
+    );
   }
 
   return (
     <section className="relative bg-[#001a3a] text-white">
       <div className="container flex">
-      <div className="w-full md:w-1/2 py-8 md:py-10 space-y-3 z-10">
-      <h1 className="text-[32px] font-bold">{bannerData.title}</h1>
-          <p className="text-base">{bannerData.content}</p>
+        <div className="w-full md:w-1/2 py-8 md:py-10 space-y-3 z-10">
+          <h1 className="text-[32px] font-bold">{bannerData.title}</h1>
+          <div
+            className="text-base text-white prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: bannerData.content }}
+          />
           <div className="pt-4">
-          <Link
+            <Link
               href={bannerData.buttonLink}
-              className="inline-block border border-white px-8 py-3 uppercase font-[15px] tracking-wide hover:bg-white hover:text-[#001a3a] transition-colors"
+              className="inline-block rounded-sm font-bold border-white border-2 px-8 py-3  tracking-wide hover:bg-white hover:text-[#001a3a] transition-colors"
             >
               {bannerData.buttonText}
             </Link>
           </div>
         </div>
         <div className="hidden md:block absolute top-0 right-0 w-full h-full">
-
-            {bannerData.imageUrl && (
-              <Image
-                src={bannerData.imageUrl}
-                alt="Banner background"
-                fill
-                className="object-cover"
-                priority
-              />
-            )}
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--color-primary)_40%,rgba(22,62,172,0.62)_60%,rgba(248,247,247,0.22))]" />
- 
+          {bannerData.imageUrl && (
+            <Image
+              src={bannerData.imageUrl}
+              alt="Banner background"
+              fill
+              className="object-cover"
+              priority
+            />
+          )}
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--color-primary)_40%,rgba(22,62,172,0.62)_60%,rgba(248,247,247,0.22))]" />
         </div>
       </div>
     </section>
-  )
-} 
+  );
+}

@@ -1,32 +1,47 @@
 import { Facebook, Linkedin, Mail } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="bg-[#001a3a] text-white py-12">
+    <footer className="bg-[#02244b] text-white py-12">
       <div className="container">
         <div className="flex flex-col md:flex-row justify-between">
           <div className="mb-8 md:mb-0">
             <div className="flex items-center gap-2 mb-6">
-              <div className="bg-white w-10 h-10 flex items-center justify-center text-[#001a3a] font-bold text-xl">
-                RC
+              <div className="flex items-center justify-center text-[#02244b] font-bold text-xl">
+                <Image
+                  width={323}
+                  height={50}
+                  src="/images/footer-logo.svg"
+                  alt="RCCI Logo"
+                />
               </div>
-              <span className="text-xl font-semibold">Rodrigues re-imagined</span>
             </div>
-            <p className="max-w-md mb-6 text-[15px]">
-              Small island, big visions! When the public sector looms large, we go bold. Entrepreneurs of Rodrigues -
-              create, innovate, make waves... and join the Chamber!
+            <p className="max-w-lg mb-6 text-[15px]">
+              Small island, big visions! When the public sector looms large, we
+              go bold. Entrepreneurs of Rodrigues - create, innovate, make
+              waves... and join the Chamber!
             </p>
             <div className="flex gap-4">
-              <Link href="#" className="bg-white rounded-full p-2 text-[#001a3a] hover:opacity-80 transition-opacity">
+              <Link
+                href="#"
+                className="bg-white rounded-full p-2 text-[#02244b] hover:opacity-80 transition-opacity"
+              >
                 <Facebook className="h-5 w-5" />
                 <span className="sr-only">Facebook</span>
               </Link>
-              <Link href="#" className="bg-white rounded-full p-2 text-[#001a3a] hover:opacity-80 transition-opacity">
+              <Link
+                href="#"
+                className="bg-white rounded-full p-2 text-[#02244b] hover:opacity-80 transition-opacity"
+              >
                 <Linkedin className="h-5 w-5" />
                 <span className="sr-only">LinkedIn</span>
               </Link>
-              <Link href="#" className="bg-white rounded-full p-2 text-[#001a3a] hover:opacity-80 transition-opacity">
+              <Link
+                href="#"
+                className="bg-white rounded-full p-2 text-[#02244b] hover:opacity-80 transition-opacity"
+              >
                 <Mail className="h-5 w-5" />
                 <span className="sr-only">Email</span>
               </Link>
@@ -74,9 +89,12 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t-[1px] border-white/60  text-[15px]">
-          <p className="text-center">© 2025 Rodrigues Chamber of Commerce and Industry. All rights reserved.</p>
+          <p className="text-center">
+            © 2025 Rodrigues Chamber of Commerce and Industry. All rights
+            reserved.
+          </p>
         </div>
       </div>
     </footer>
   );
-} 
+}
