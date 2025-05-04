@@ -1,122 +1,53 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { prisma } from "@/prisma";
-import { formatDistanceToNow } from "date-fns";
-import Image from "next/image";
-import Link from "next/link";
-
-// Function to limit words in a title
-function limitWords(title: string, limit = 10): string {
-  const words = title.split(' ');
-  if (words.length <= limit) return title;
-  return words.slice(0, limit).join(' ') + '...';
-}
-
-async function getNewsletterArticles() {
-  try {
-    // Find the newsletter category
-    const category = await prisma.category.findUnique({
-      where: {
-        slug: "newsletter"
-      }
-    });
-
-    if (!category) {
-      return [];
-    }
-
-    // Get articles from the newsletter category
-    const articles = await prisma.article.findMany({
-      where: {
-        categoryId: category.id,
-        status: "published"
-      },
-      orderBy: {
-        publishedAt: "desc"
-      },
-      include: {
-        featuredImage: true,
-        author: true,
-        category: true
-      }
-    });
-
-    return articles;
-  } catch (error) {
-    console.error("Error fetching newsletter articles:", error);
-    return [];
-  }
-}
+import ArticleCard from "@/components/shared/ArticleCard";
+import { SocialShare } from "@/components/shared/SocialShare";
+import { getNewsletterArticles } from "./actions";
 
 export default async function NewsletterPage() {
-  const articles = await getNewsletterArticles();
+  const { articles, error } = await getNewsletterArticles();
 
   return (
-    <div className="container py-8 md:py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold">RCCI Newsletter</h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Stay updated with our latest newsletters
-        </p>
-      </div>
+    // Content Section
+    <section className="py-8">
+      <div className="container">
+        {/* Social Sharing */}
+        <SocialShare
+          className="float-left mr-6"
+          vertical={true}
+          title="RCCI Newsletter"
+        />
 
-      {articles.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles.map((article) => (
-            <Card key={article.id} className="flex flex-col h-full">
-              <CardHeader className="pb-3">
-                <div className="text-sm text-muted-foreground mb-1">
-                  {article.publishedAt 
-                    ? formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })
-                    : "Recently"
-                  }
-                </div>
-                <CardTitle className="line-clamp-2" title={article.title}>
-                  {limitWords(article.title)}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-2 flex-grow">
-                {article.featuredImage && (
-                  <div className="aspect-video relative mb-4 overflow-hidden rounded-lg">
-                    <Image
-                      src={article.featuredImage.path}
-                      alt={article.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                {!article.featuredImage && (
-                  <div className="aspect-video relative mb-4 overflow-hidden rounded-lg bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400">No image</span>
-                  </div>
-                )}
-                <p className="line-clamp-3 text-muted-foreground">
-                  {article.excerpt || article.content.replace(/<[^>]+>/g, "").substring(0, 150) + "..."}
-                </p>
-              </CardContent>
-              <CardFooter className="pt-2">
-                <div className="flex items-center justify-between w-full">
-                  <Link href={`/articles/${article.slug}`} className="text-primary hover:underline">
-                    Read more
-                  </Link>
-                  {article.author && (
-                    <div className="text-sm text-muted-foreground">
-                      By {article.author.name}
-                    </div>
-                  )}
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12 border rounded-lg bg-gray-50">
-          <p className="text-muted-foreground mb-4">No newsletter articles found.</p>
-          <p className="text-sm text-muted-foreground">
-            Check back soon for the latest newsletters from RCCI.
+        <div className="ml-16">
+          <h2 className="text-2xl font-bold mb-4">RCCI Newsletter</h2>
+
+          <p className="text-gray-700 mb-8 max-w-3xl">
+            Stay updated with our regular newsletters, featuring the latest
+            developments in the Rodrigues business community, upcoming events,
+            and important policy updates. Our newsletters provide comprehensive
+            insights and information to help businesses in Rodrigues stay
+            informed and connected.
           </p>
+
+          {/* Articles Section */}
+          <div className="mt-12">
+            <h3 className="text-xl font-bold mb-6">Latest Newsletters</h3>
+
+            {error ? (
+              <div className="text-red-500">{error}</div>
+            ) : articles.length > 0 ? (
+              <div className="space-y-6">
+                {articles.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-gray-500 p-4 bg-gray-50 rounded-lg">
+                No newsletter articles available at the moment. Check back soon
+                for the latest newsletters from RCCI.
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
+      </div>
+    </section>
   );
-} 
+}
